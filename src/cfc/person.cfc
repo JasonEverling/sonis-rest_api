@@ -1,15 +1,15 @@
 component displayname="person" author="Jason Everling" hint="Functions related to the person" output="false"
 {
 
-/**
- * Returns the details of a person
- *
- * @author Jason A. Everling
- * @user Persons identifier
- * @type Type of identifier, soc_sec, ldap, or email
- * @return array
- */
-    public function getDetails(required string user, required string type) returnFormat="json"
+    /**
+     * Returns the details of a person
+     *
+     * @author Jason A. Everling
+     * @user Persons identifier
+     * @type Type of identifier, soc_sec, ldap, or email
+     * @return array
+     */
+    public function getDetails(required string user, required string type)
     {
         if (type == "soc_sec") {
             filter = "WHERE n.soc_sec = :user";
@@ -44,16 +44,16 @@ component displayname="person" author="Jason Everling" hint="Functions related t
         return result;
     }
 
-/**
- * Updates a persons password/pin
- *
- * @author Jason A. Everling
- * @user Username
- * @password Password
- * @type Type of username, either soc_sec, ldap, or email
- * @return boolean
- */
-    public function updateCredentials(required string user, required string password, required string type) returnFormat="json"
+    /**
+     * Updates a persons password/pin
+     *
+     * @author Jason A. Everling
+     * @user Username
+     * @password Password
+     * @type Type of username, either soc_sec, ldap, or email
+     * @return boolean
+     */
+    public function updateCredentials(required string user, required string password, required string type)
     {
 
         if (isAuthenticated) {
@@ -84,16 +84,16 @@ component displayname="person" author="Jason Everling" hint="Functions related t
         return {"Error": "Invalid Credentials"};
     }
 
-/**
- * Returns true or false if credentials are valid
- *
- * @author Jason A. Everling
- * @user Username
- * @password Password
- * @type Type of username, either soc_sec, ldap, or email
- * @return boolean true or false
- */
-    public function verifyCredentials(required string user, required string password, required string type, string credential) returnFormat="json"
+    /**
+     * Returns true or false if credentials are valid
+     *
+     * @author Jason A. Everling
+     * @user Username
+     * @password Password
+     * @type Type of username, either soc_sec, ldap, or email
+     * @return boolean true or false
+     */
+    public function verifyCredentials(required string user, required string password, required string type, string credential)
     {
 
         if (isAuthenticated) {
