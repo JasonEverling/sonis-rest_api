@@ -12,7 +12,7 @@ component displayname="utils" author="Jason Everling" hint="Utility Functions fo
     {
 
         if (len(rtrim(lastname)) == 0) {
-            throw(type = "Invalid Lastname", message = "A lastname is required");
+            result = '{"Return Code": 401, "Details": "Invalid Lastname", "Extended": "A lastname is required"}';
         }
         sql = new query();
         sql.setDatasource("#session.dsname#");
@@ -30,9 +30,9 @@ component displayname="utils" author="Jason Everling" hint="Utility Functions fo
             }
         }
         result = sonisid;
-        return result;
+        return '{"NewID": "' & result & '"}';
     }
-    
+
     /**
      * Generates a random _rid for use in tables
      *
@@ -45,13 +45,14 @@ component displayname="utils" author="Jason Everling" hint="Utility Functions fo
         today = dateformat(now(),'yymmdd');
         randr = RandRange(100000000, 999999999);
         if (suffix == "0" or suffix == "1") {
-            result = today & randr & suffix;
+            rid = today & randr & suffix;
+            result = '{"NewRID": "' & rid & '"}';
         } else {
-            result = "Invalid suffix";
+            result = '{"Return Code": 401, "Details": "Invalid suffix"}';
         }
         return result;
     }
-    
+
     /**
      * Generates a random uuid value
      *
@@ -64,12 +65,14 @@ component displayname="utils" author="Jason Everling" hint="Utility Functions fo
     {
         result = "";
         if (rtrim(lower(format)) == "cf" or not rtrim(lower(format)) == "guid") {
-            throw(type = "Invalid Format", message = "Either of (cf, guid) is REQUIRED for this function, type specified:  " & format);
+            result = '{"Return Code": 401, "Details": "Invalid Format", "Extended": "Either of (cf, guid) is REQUIRED for this function, type specified:  "' & format & '}';
         }
         if (format == "guid") {
-            result = insert("-", CreateUUID(), 23);
+            newguid = insert("-", CreateUUID(), 23);
+            result = '{"NewGUID": "' & newguid & '"}';
         } else {
-            result = CreateUUID();
+            newuuid = CreateUUID();
+            result = '{"NewUUID": "' & newuuid & '"}';
         }
         return result;
     }
