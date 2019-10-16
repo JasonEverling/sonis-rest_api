@@ -41,7 +41,7 @@ component displayname="person" author="Jason Everling" hint="Functions related t
                         LEFT JOIN dept ON n.dept_cod = dept.dept_cod
                         LEFT JOIN level_ l ON n.level_ = l.level_ " & filter;
         result = sql.execute(sql=stmt).getResult();
-        return serializeJSON(result, "struct");
+        return result;
     }
 
 /**
