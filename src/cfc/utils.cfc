@@ -15,7 +15,7 @@ component displayname="utils" author="Jason Everling" hint="Utility Functions fo
             throw(type = "Invalid Lastname", message = "A lastname is required");
         }
         sql = new query();
-        sql.setDatasource("soniswebp");
+        sql.setDatasource("#session.dsname#");
         sql.SetName("sql");
         ln = left(ucase(lastname),2);
         matched = true;

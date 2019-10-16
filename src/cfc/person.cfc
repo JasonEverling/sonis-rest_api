@@ -21,7 +21,7 @@ component displayname="person" author="Jason Everling" hint="Functions related t
             return false;
         }
         sql = new query();
-        sql.setDatasource("soniswebp");
+        sql.setDatasource("#session.dsname#");
         sql.SetName("sql");
         sql.addParam(name="user",value=user,cfsqltype="varchar");
         stmt = "SELECT rtrim(n.soc_sec) as soc_sec, rtrim(n.last_name) as last_name, rtrim(n.first_name) as first_name, rtrim(n.mi) as mi, n.disabled, rtrim(n.prefix) as prefix, rtrim(n.suffix) as suffix, rtrim(n.maiden) as maiden, CONVERT(VARCHAR, n.birthdate, 23) AS birthdate, dbo.udf_getAge(n.birthdate, GETDATE()) AS age, n.citizen, n.gender, rtrim(g.gender_txt) as gender_txt, rtrim(n.ethnic_cod) as ethnic_cod, rtrim(e.ethnic_txt) as ethnic_txt,
@@ -67,7 +67,7 @@ component displayname="person" author="Jason Everling" hint="Functions related t
                 return false;
             }
             sql = new query();
-            sql.setDatasource("soniswebp");
+            sql.setDatasource("#session.dsname#");
             sql.SetName("sql");
             sql.addParam(name = "user", value = user, cfsqltype = "varchar");
             sql.addParam(name = "password", value = password, cfsqltype = "varchar");
@@ -102,7 +102,7 @@ component displayname="person" author="Jason Everling" hint="Functions related t
                 isSecurity = true;
             }
             sql = new query();
-            sql.setDatasource("soniswebp");
+            sql.setDatasource("#session.dsname#");
             sql.SetName("sql");
             sql.addParam(name = "user", value = user, cfsqltype = "varchar");
             sql.addParam(name = "password", value = password, cfsqltype = "varchar");

@@ -20,7 +20,7 @@ component displayname="login" author="Jason Everling" hint="Functions related to
                 isSecurity = true;
             }
             sql = new query();
-            sql.setDatasource("soniswebp");
+            sql.setDatasource("#session.dsname#");
             sql.SetName("sql");
             sql.addParam(name = "user", value = user, cfsqltype = "varchar");
             sql.addParam(name = "password", value = password, cfsqltype = "varchar");
@@ -62,7 +62,7 @@ component displayname="login" author="Jason Everling" hint="Functions related to
             throw(type = "Invalid Token", message = "Token is required");
         }
         sql = new query();
-        sql.setDatasource("#sonis.ds#");
+        sql.setDatasource("#session.dsname#");
         sql.SetName("sql");
         sql.addParam(name="token",value=token,cfsqltype="varchar");
         stmt = "SELECT s.user_id, s.disabled
