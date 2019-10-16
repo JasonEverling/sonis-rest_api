@@ -16,11 +16,13 @@
 <cfset variables.apiToken = getHttpRequestData().headers["X-SONIS-AUTHN"] />
 <cfset variables.apiJSON = getHTTPRequestData().content />
 <cfset variables.apiData = deserializeJSON(ToString(apiJSON)) />
+
 <!--- Object is a builtin Sonis function --->
 <cfif NOT isDefined('builtin')>
     <cfset variables.builtin = false />
 </cfif>
 
+<!--- Build local variables from JSON data --->
 <cfloop collection="#apiData#" item="key">
     <cfset "#key#" = "#apiData[key]#" />
 </cfloop>
@@ -42,6 +44,7 @@
     <cfelse>
         <cfinvoke component = "CFC.#object#" method = "#method#" returnvariable = "result">
             <cfinvokeargument name = "sonis_ds" value = '#sonis.ds#' />
+            <cfinvokeargument name = "MainDir" value = '#MainDir#' />
             <cfloop collection="#apiData.argumentdata#" item="i">
                 <cfinvokeargument name = "#i#" value = "#apiData.argumentdata[i]#" />
             </cfloop>
