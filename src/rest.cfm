@@ -1,4 +1,6 @@
+<!--- not used in prod
 <cfinclude template = "common/rest/header.cfm" />
+--->
 <cfheader name="Content-Type" value="application/json;charset=UTF-8">
 
 <cfif NOT StructKeyExists(GetHttpRequestData().Headers, "X-SONIS-AUTHN")>
@@ -56,5 +58,6 @@
         #result#
     </cfoutput>
 </cfif>
-
+<!--- not used in prod
 <cfinclude template="common/rest/footer.cfm" />
+--->
