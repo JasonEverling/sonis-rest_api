@@ -119,7 +119,7 @@ component displayname="person" author="Jason Everling" hint="Functions related t
             if (isSecurity) {
                 stmt = "SELECT s.user_id, s.disabled, CONVERT(char, DECRYPTBYKEYAUTOCERT(CERT_ID('SSN'), NULL, s.password)) AS password
                         FROM security s
-                        WHERE s.user_id = :user AND s.password = :password AND s.disabled = '0'";
+                        WHERE s.user_id = :user AND CONVERT(char, DECRYPTBYKEYAUTOCERT(CERT_ID('SSN'), NULL, s.password)) = :password AND s.disabled = '0'";
             }
             result = sql.execute(sql = stmt).getResult();
             if (result.affected > 0) {
