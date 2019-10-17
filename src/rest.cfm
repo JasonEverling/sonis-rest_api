@@ -3,19 +3,42 @@
 --->
 <cfheader name="Content-Type" value="application/json;charset=UTF-8">
 
-<cfif NOT StructKeyExists(GetHttpRequestData().Headers, "X-SONIS-AUTHN")>
-    <cfset variables.result = 'Return Code": 400, "Details": "Bad Request", "Extended": "X-SONIS-AUTHN Header is missing"}' />
+<!--- Use a shorter session than what is defined in application.cfm --->
+<cfif NOT isDefined('session.expires')>
+    <cfset session.expires = DateAdd("s", 300, Now()) />
+<cfelse>
+    <cfif #session.expires# LT Now()>
+        <cfset structClear(session) />
+    </cfif>
+    <cfset session.expires = DateAdd("s", 300, Now()) />
 </cfif>
-<cfif NOT isJSON(getHTTPRequestData().content)>
-    <cfset variables.result = '{"Return Code": 400, "Details": "Bad Request", "Extended": "Payload is not valid JSON"}' />
+
+<cfif NOT StructKeyExists(getHttpRequestData().headers, "X-SONIS-USER") OR NOT isJSON(getHTTPRequestData().content) OR NOT StructKeyExists(getHttpRequestData().headers, "X-SONIS-PWD")>
+    <cfif NOT StructKeyExists(getHttpRequestData().headers, "X-SONIS-USER")>
+        <cfset variables.result = 'Return Code": 400, "Details": "Bad Request", "Extended": "X-SONIS-USER Header is missing"}' />
+    </cfif>
+    <cfif NOT StructKeyExists(getHttpRequestData().headers, "X-SONIS-PWD")>
+        <cfset variables.result = 'Return Code": 400, "Details": "Bad Request", "Extended": "X-SONIS-PWD Header is missing"}' />
+    </cfif>
+    <cfif NOT isJSON(getHTTPRequestData().content)>
+        <cfset variables.result = '{"Return Code": 400, "Details": "Bad Request", "Extended": "Payload is not valid JSON"}' />
+    </cfif>
+    <cfoutput>
+        #result#
+    </cfoutput>
+    <cfabort>
 </cfif>
 
 <cfset session.dsname = "#sonis.ds#" />
 <cfset session.wwwroot = ExpandPath( "./" ) />
-<cfset variables.contentType = "application/json;charset=UTF-8" />
-<cfset variables.apiToken = getHttpRequestData().headers["X-SONIS-AUTHN"] />
+<cfset session.apiUser = lCase(getHttpRequestData().headers["X-SONIS-USER"]) />
+<cfset variables.apiToken = getHttpRequestData().headers["X-SONIS-PWD"] />
 <cfset variables.apiJSON = getHTTPRequestData().content />
 <cfset variables.apiData = deserializeJSON(ToString(apiJSON)) />
+<cfset variables.contentType = "application/json;charset=UTF-8" />
+<cfif NOT isDefined('session.retries')>
+    <cfset session.retries = 0 />
+</cfif>
 
 <!--- Object is a builtin Sonis function --->
 <cfif NOT isDefined('builtin')>
@@ -28,13 +51,41 @@
 </cfloop>
 
 <!--- Get authorization to continue --->
-<cfinvoke component = "CFC.rest.Login" method = "apiAuthorization" returnvariable = "isAuthenticated">
+<cfinvoke component = "CFC.rest.login" method = "apiAuthorization" returnvariable = "isAuthenticated">
         <cfinvokeargument name = "token"  value = '#apiToken#' />
 </cfinvoke>
 
-<cfif '#isAuthenticated#' eq false>
+<!-- Throttle login attempts --->
+<cfif #session.retries# GTE #webopt.login_retries#>
+    <cfinvoke component = "CFC.rest.login" method = "disableLogin" returnvariable = "locked">
+        <cfinvokeargument name = "user"  value = '#session.apiUser#' />
+    </cfinvoke>
+    <cfif NOT #locked#>
+        <cfoutput>
+            '{Return Code": 417, "Details": "Expectation Failed", "Extended": "Please contact the site administrator"}'
+        </cfoutput>
+        <cfabort>
+    </cfif>
+</cfif>
+
+<!-- Check if disabled or locked --->
+<cfinvoke component = "CFC.rest.login" method = "verifyCredentials" returnvariable = "isDisabled">
+    <cfinvokeargument name = "user"  value = '#session.apiUser#' />
+    <cfinvokeargument name = "password"  value = '#variables.apiToken#' />
+    <cfinvokeargument name = "type"  value = '' />
+    <cfinvokeargument name = "credential"  value = 'security' />
+</cfinvoke>
+
+<cfif #isDisabled#>
+    <cfset variables.result = '{"Return Code": 401, "Details": "Account Disabled"}' />
+<cfelseif '#isAuthenticated#' eq false>
+    <cfif isDefined('session.retries') AND #session.retries# GTE 0>
+        <cfset session.retries = #session.retries# + 1>
+    </cfif>
     <cfset variables.result = '{"Return Code": 401, "Details": "Unauthorized"}' />
 <cfelse>
+<!--- We got a authorization, hooray --->
+    <cfset session.retries = 0 />
     <cfif '#builtin#' eq false>
         <cfinvoke component = "CFC.rest.#object#" method = "#method#" returnvariable = "result">
             <cfloop collection="#apiData.argumentdata#" item="i">
@@ -58,7 +109,7 @@
     </cfoutput>
 <cfelse>
     <cfoutput>
-        #result#
+        {"Result": "#result#"}
     </cfoutput>
 </cfif>
 <!--- not used in prod
