@@ -4,8 +4,9 @@
 <!--- Setup the request --->
 <cfscript>
     cfheader(name="Content-Type", value="application/json;charset=UTF-8");
-    sessionLength = CreateObject("component", "CFC.rest.validate").validateSession();
-    hasHeaders = CreateObject("component", "CFC.rest.validate").validateHeaders();
+    objValid = CreateObject("component", "CFC.rest.validate");
+    sessionLength = objValid.validateSession();
+    hasHeaders = objValid.validateHeaders();
     if (!isBoolean(hasHeaders)) {
         return hasHeaders;
         exit;
@@ -92,7 +93,7 @@
     </cfoutput>
 <cfelse>
     <cfoutput>
-        {"Result": "#result#"}
+        #result#
     </cfoutput>
 </cfif>
 <!--- not used in prod
