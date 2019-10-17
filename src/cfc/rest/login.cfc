@@ -11,41 +11,38 @@ component displayname="login" author="Jason Everling" hint="Functions related to
      * @credential Set to "security" if validating security credentials, blank otherwise
      * @return boolean true or false
      */
-    public function verifyCredentials(required string user, required string password, required string type, string credential) returnFormat="json"
+    public function verifyCredentials(required string user, required string password, required string type, string credential)
     {
 
-        if (isAuthenticated) {
-            isSecurity = false;
-            if (credential == "security") {
-                isSecurity = true;
-            }
-            sql = new query();
-            sql.setDatasource("#session.dsname#");
-            sql.SetName("sql");
-            sql.addParam(name = "user", value = user, cfsqltype = "varchar");
-            sql.addParam(name = "password", value = password, cfsqltype = "varchar");
-            if (type == "soc_sec") {
-                filter = "WHERE n.soc_sec = :user AND n.pin = :password AND n.disabled = '0'";
-            } else if (type == "ldap") {
-                filter = "WHERE n.ldap_id = :user AND n.pin = :password AND n.disabled = '0'";
-            } else if (type == "email") {
-                filter = "INNER JOIN address a ON n.soc_sec = a.soc_sec AND a.preferred = '1' WHERE a.e_mail = :user AND n.pin = :password AND n.disabled = '0'";
-            } else {
-                return false;
-            }
-            stmt = "SELECT n.soc_sec, n.disabled, CONVERT(char, DECRYPTBYKEYAUTOCERT(CERT_ID('SSN'), NULL, n.PIN)) AS pin FROM name n " & filter;
-            if (isSecurity) {
-                stmt = "SELECT s.user_id, s.disabled, CONVERT(char, DECRYPTBYKEYAUTOCERT(CERT_ID('SSN'), NULL, s.password)) AS password
-                        FROM security s
-                        WHERE s.user_id = :user AND CONVERT(char, DECRYPTBYKEYAUTOCERT(CERT_ID('SSN'), NULL, s.password)) = :password AND s.disabled = '0'";
-            }
-            result = sql.execute(sql = stmt).getResult();
-            if (result.affected > 0) {
-                return true;
-            }
+        isSecurity = false;
+        if (credential == "security") {
+            isSecurity = true;
+        }
+        sql = new query();
+        sql.setDatasource("#session.dsname#");
+        sql.SetName("sql");
+        sql.addParam(name = "user", value = user, cfsqltype = "varchar");
+        sql.addParam(name = "password", value = password, cfsqltype = "varchar");
+        if (type == "soc_sec") {
+            filter = "WHERE n.soc_sec = :user AND n.pin = :password AND n.disabled = '0'";
+        } else if (type == "ldap") {
+            filter = "WHERE n.ldap_id = :user AND n.pin = :password AND n.disabled = '0'";
+        } else if (type == "email") {
+            filter = "INNER JOIN address a ON n.soc_sec = a.soc_sec AND a.preferred = '1' WHERE a.e_mail = :user AND n.pin = :password AND n.disabled = '0'";
+        } else {
             return false;
         }
-        return {"Error": "Invalid Credentials"};
+        stmt = "SELECT n.soc_sec, n.disabled, CONVERT(char, DECRYPTBYKEYAUTOCERT(CERT_ID('SSN'), NULL, n.PIN)) AS pin FROM name n " & filter;
+        if (isSecurity) {
+            stmt = "SELECT s.user_id, s.disabled, CONVERT(char, DECRYPTBYKEYAUTOCERT(CERT_ID('SSN'), NULL, s.password)) AS password
+                    FROM security s
+                    WHERE s.user_id = :user AND CONVERT(char, DECRYPTBYKEYAUTOCERT(CERT_ID('SSN'), NULL, s.password)) = :password AND s.disabled = '0'";
+        }
+        result = sql.execute(sql = stmt).getResult();
+        if (result.RecordCount > 0) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -65,13 +62,41 @@ component displayname="login" author="Jason Everling" hint="Functions related to
         sql.setDatasource("#session.dsname#");
         sql.SetName("sql");
         sql.addParam(name="token",value=token,cfsqltype="varchar");
+        sql.addParam(name="user",value=#session.apiUser#,cfsqltype="varchar");
         stmt = "SELECT s.user_id, s.disabled
                 FROM security s
-                WHERE s.user_id LIKE 'api%' AND CONVERT(char, DECRYPTBYKEYAUTOCERT(CERT_ID('SSN'), NULL, s.password)) = :token AND s.disabled = '0'";
+                WHERE s.user_id = :user AND CONVERT(char, DECRYPTBYKEYAUTOCERT(CERT_ID('SSN'), NULL, s.password)) = :token AND s.disabled = '0'";
         result = sql.execute(sql=stmt).getResult();
         if (result.RecordCount > 0) {
             return true;
         }
         return false;
     }
+
+    /**
+    * Disables an account login
+    *
+    * @author Jason A. Everling
+    * @user The account to be disabled
+    * @return boolean true or false
+    */
+    public function disableLogin(required string user)
+    {
+        error = false;
+        sql = new query();
+        sql.setDatasource("#session.dsname#");
+        sql.SetName("sql");
+        sql.addParam(name="user",value=user,cfsqltype="varchar");
+        stmt = "UPDATE security SET disabled = 1 WHERE user_id = :user";
+        try {
+            sql.execute(sql=stmt).getResult();
+        } catch (any e) {
+            error = true;
+        }
+        if (error == false) {
+            return true;
+        }
+        return false;
+    }
+
 }
