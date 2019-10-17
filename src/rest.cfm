@@ -1,33 +1,16 @@
 <!--- not used in prod
 <cfinclude template = "common/rest/header.cfm" />
 --->
-<cfheader name="Content-Type" value="application/json;charset=UTF-8">
-
-<!--- Use a shorter session than what is defined in application.cfm --->
-<cfif NOT isDefined('session.expires')>
-    <cfset session.expires = DateAdd("s", 300, Now()) />
-<cfelse>
-    <cfif #session.expires# LT Now()>
-        <cfset structClear(session) />
-    </cfif>
-    <cfset session.expires = DateAdd("s", 300, Now()) />
-</cfif>
-
-<cfif NOT StructKeyExists(getHttpRequestData().headers, "X-SONIS-USER") OR NOT isJSON(getHTTPRequestData().content) OR NOT StructKeyExists(getHttpRequestData().headers, "X-SONIS-PWD")>
-    <cfif NOT StructKeyExists(getHttpRequestData().headers, "X-SONIS-USER")>
-        <cfset variables.result = 'Return Code": 400, "Details": "Bad Request", "Extended": "X-SONIS-USER Header is missing"}' />
-    </cfif>
-    <cfif NOT StructKeyExists(getHttpRequestData().headers, "X-SONIS-PWD")>
-        <cfset variables.result = 'Return Code": 400, "Details": "Bad Request", "Extended": "X-SONIS-PWD Header is missing"}' />
-    </cfif>
-    <cfif NOT isJSON(getHTTPRequestData().content)>
-        <cfset variables.result = '{"Return Code": 400, "Details": "Bad Request", "Extended": "Payload is not valid JSON"}' />
-    </cfif>
-    <cfoutput>
-        #result#
-    </cfoutput>
-    <cfabort>
-</cfif>
+<!--- Setup the request --->
+<cfscript>
+    cfheader(name="Content-Type", value="application/json;charset=UTF-8");
+    sessionLength = CreateObject("component", "CFC.rest.validate").validateSession();
+    hasHeaders = CreateObject("component", "CFC.rest.validate").validateHeaders();
+    if (!isBoolean(hasHeaders)) {
+        return hasHeaders;
+        exit;
+    }
+</cfscript>
 
 <cfset session.dsname = "#sonis.ds#" />
 <cfset session.wwwroot = ExpandPath( "./" ) />
