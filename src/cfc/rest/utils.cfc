@@ -8,7 +8,7 @@ component displayname="utils" author="Jason Everling" hint="Utility Functions fo
     * @details the The message detail
     * @extended more information regarding the error
     * @author Jason A. Everling
-    * @return integer the generated number
+    * @return numeric the generated number
     */
     public function createHttpMsg(required numeric code, required string details, string extended = "")
     {
@@ -25,7 +25,7 @@ component displayname="utils" author="Jason Everling" hint="Utility Functions fo
      *
      * @lastname the persons last name
      * @author Jason A. Everling
-     * @return integer the generated number
+     * @return numeric the generated number
      */
     public function generateID(required string lastname)
     {
@@ -57,7 +57,7 @@ component displayname="utils" author="Jason Everling" hint="Utility Functions fo
      *
      * @suffix Either a 0 or 1 suffixed to number to match Sonis rid's
      * @author Jason A. Everling
-     * @return integer the generated number
+     * @return numeric the generated number
      */
     public function generateRID(required string suffix)
     {
@@ -78,7 +78,7 @@ component displayname="utils" author="Jason Everling" hint="Utility Functions fo
      *
      * @format string either cf or guid format, defaults to cf
      * @author Jason A. Everling
-     * @return integer the generated number
+     * @return numeric the generated number
      */
     public function generateUUID(required string format)
     {
@@ -92,6 +92,31 @@ component displayname="utils" author="Jason Everling" hint="Utility Functions fo
         } else {
             newuuid = CreateUUID();
             result = '{"NewUUID": "' & newuuid & '"}';
+        }
+        return result;
+    }
+
+    /**
+    * Converts a list to struct, a sister to listToArray
+    *
+    * @list A list of key=value pairs separated by a semi-colon
+    * @author Jason A. Everling
+    * @return struct the generated struct
+    */
+    public function listToStruct(required string list)
+    {
+        result = {};
+        item = 0;
+        delimiter = ";";
+        tmpList = arrayNew(1);
+        if (ArrayLen(arguments) > 1) {
+            delimiter = arguments[2];
+        }
+        tmpList = listToArray(list, delimiter);
+        for (item = 1; item <= ArrayLen(tmpList); item = item + 1) {
+            if (!structkeyexists(result, trim(ListFirst(tmpList[item], "=")))) {
+                StructInsert(result, trim(ListFirst(tmpList[item], "=")), trim(ListLast(tmpList[item], "=")));
+            }
         }
         return result;
     }
