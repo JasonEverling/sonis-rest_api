@@ -83,7 +83,7 @@
                     }
                 };
             } else {
-                cfinvoke(component = "CFC.rest.#object#", method = "#method#", returnvariable = "result") {
+                cfinvoke(component = "CFC.#object#", method = "#method#", returnvariable = "result") {
                     cfinvokeargument(name = sonis_ds, value = sonis.ds);
                     cfinvokeargument(name = MainDir, value = MainDir);
                     if (variables.action == 'GET') {
