@@ -2,6 +2,25 @@ component displayname="utils" author="Jason Everling" hint="Utility Functions fo
 {
 
     /**
+    * Returns an http error code message in JSON format
+    *
+    * @code the error code
+    * @details the The message detail
+    * @extended more information regarding the error
+    * @author Jason A. Everling
+    * @return integer the generated number
+    */
+    public function createHttpMsg(required numeric code, required string details, string extended = "")
+    {
+        if (extended == '') {
+            result = '{"Return Code": #code#, "Details": "#details#"}';
+        } else {
+            result = '{"Return Code": #code#, "Details": "#details#", "Extended": "#extended#"}';
+        }
+        return result;
+    }
+
+    /**
      * Generates a new Sonis ID
      *
      * @lastname the persons last name

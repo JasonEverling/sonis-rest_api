@@ -1,6 +1,8 @@
 component displayname="person" author="Jason Everling" hint="Functions related to the person" output="false"
 {
 
+    utils = CreateObject("component", "utils");
+
     /**
      * Returns the details of a person
      *
@@ -18,7 +20,7 @@ component displayname="person" author="Jason Everling" hint="Functions related t
         } else if (type == "email") {
             filter = "WHERE a.e_mail = :user OR a.e_mail2 = :user";
         } else {
-            return false;
+            return utils.createHttpMsg(400, "Bad Request");
         }
         sql = new query();
         sql.setDatasource("#session.dsname#");
@@ -63,7 +65,7 @@ component displayname="person" author="Jason Everling" hint="Functions related t
         } else if (type == "email") {
             filter = "FROM name n INNER JOIN address a ON n.soc_sec = a.soc_sec AND a.preferred = '1' WHERE a.email = :user";
         } else {
-            return false;
+            return utils.createHttpMsg(204, "No Change");
         }
         sql = new query();
         sql.setDatasource("#session.dsname#");
@@ -76,9 +78,9 @@ component displayname="person" author="Jason Everling" hint="Functions related t
                 SET pin = EncryptByKey(Key_Guid('SSN_Key_01'),:password) " & filter & " SELECT @@RowCount AS affected";
         result = sql.execute(sql = stmt).getResult();
         if (result.affected > 0) {
-            return '{"Return Code": 202, "Details": "Accepted"}';
+            return utils.createHttpMsg(202, "Accepted");
         }
-        return '{"Return Code": 204, "Details": "No Change"}';
+        return utils.createHttpMsg(204, "No Change");
     }
 
     /**
@@ -100,7 +102,7 @@ component displayname="person" author="Jason Everling" hint="Functions related t
         } else if (type == "email") {
             filter = "FROM name n INNER JOIN address a ON n.soc_sec = a.soc_sec AND a.preferred = '1' WHERE a.email = :user";
         } else {
-            return false;
+            return utils.createHttpMsg(400, "Bad Request");
         }
         sql = new query();
         sql.setDatasource("#session.dsname#");
@@ -115,11 +117,11 @@ component displayname="person" author="Jason Everling" hint="Functions related t
                     SET " & attribute & " = :newvalue " & filter & " SELECT @@RowCount AS affected";
             result = sql.execute(sql = stmt).getResult();
             if (result.affected > 0) {
-                return '{"Return Code": 202, "Details": "Accepted"}';
+                return utils.createHttpMsg(202, "Accepted");
             }
-            return '{"Return Code": 204, "Details": "No Change"}';
+            return utils.createHttpMsg(204, "No Change");
         } else {
-            return '{"Return Code": 400, "Details": "Bad Request"}';
+            return utils.createHttpMsg(400, "Bad Request");
         }
     }
 
@@ -150,7 +152,7 @@ component displayname="person" author="Jason Everling" hint="Functions related t
         } else if (type == "email") {
             filter = "INNER JOIN address a ON n.soc_sec = a.soc_sec AND a.preferred = '1' WHERE a.e_mail = :user AND n.pin = :password AND n.disabled = '0'";
         } else {
-            return false;
+            return utils.createHttpMsg(400, "Bad Request");
         }
         stmt = "SELECT n.soc_sec, n.disabled, CONVERT(char, DECRYPTBYKEYAUTOCERT(CERT_ID('SSN'), NULL, n.PIN)) AS pin FROM name n " & filter;
         if (isSecurity) {
@@ -160,8 +162,8 @@ component displayname="person" author="Jason Everling" hint="Functions related t
         }
         result = sql.execute(sql = stmt).getResult();
         if (result.affected > 0) {
-            return true;
+            return utils.createHttpMsg(200, "OK");
         }
-        return false;
+        return utils.createHttpMsg(404, "Not Found");
     }
 }

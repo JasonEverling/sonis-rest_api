@@ -1,6 +1,8 @@
 component displayname="validate" author="Jason Everling" hint="Utility Functions around validation" output="false"
 {
 
+    utils = CreateObject("component", "utils");
+
     /**
     * Validates required headers are set
     *
@@ -11,13 +13,13 @@ component displayname="validate" author="Jason Everling" hint="Utility Functions
     {
         if (!StructKeyExists(getHttpRequestData().headers, "X-SONIS-USER") || !isJSON(getHTTPRequestData().content) || !StructKeyExists(getHttpRequestData().headers, "X-SONIS-PWD")) {
             if (!StructKeyExists(getHttpRequestData().headers, "X-SONIS-USER")) {
-                result = 'Return Code": 400, "Details": "Bad Request", "Extended": "X-SONIS-USER Header is missing"}';
+                result = utils.createHttpMsg(400, "Bad Request", "X-SONIS-USER Header is missing");
             }
             if (!StructKeyExists(getHttpRequestData().headers, "X-SONIS-PWD")) {
-                result = 'Return Code": 400, "Details": "Bad Request", "Extended": "X-SONIS-PWD Header is missing"}';
+                result = utils.createHttpMsg(400, "Bad Request", "X-SONIS-PWD Header is missing");
             }
             if (!isJSON(getHTTPRequestData().content)) {
-                result = '{"Return Code": 400, "Details": "Bad Request", "Extended": "Payload is not valid JSON"}';
+                result = utils.createHttpMsg(400, "Bad Request", "Payload is not valid JSON");
             }
             return result;
         } else {
