@@ -39,7 +39,7 @@
         <cfinvokeargument name = "token"  value = '#apiToken#' />
 </cfinvoke>
 
-<!-- Throttle login attempts --->
+<!--- Throttle login attempts --->
 <cfif #session.retries# GTE #webopt.login_retries#>
     <cfinvoke component = "CFC.rest.login" method = "disableLogin" returnvariable = "locked">
         <cfinvokeargument name = "user"  value = '#session.apiUser#' />
@@ -52,7 +52,7 @@
     </cfif>
 </cfif>
 
-<!-- Check if disabled or locked --->
+<!--- Check if disabled or locked --->
 <cfinvoke component = "CFC.rest.login" method = "verifyCredentials" returnvariable = "isDisabled">
     <cfinvokeargument name = "user"  value = '#session.apiUser#' />
     <cfinvokeargument name = "password"  value = '#variables.apiToken#' />
