@@ -42,5 +42,10 @@ curl -X POST https://sonis.example.com/rest.cfm \
     -d '{"object": "address","method": "addressSearch","returns": true,"builtin": true,"argumentdata": {"soc_sec": "000000000","preferred": true}}'
 ````
 
+GET Request example, you still need to add the Headers! Also remember, a GET request will store the request URL in your web servers logs so do not use GET to pass sensitive information.
+````
+https://sonis.example.com/rest.cfm?object=person&method=getDetails&returns=true&builtin=false&argumentdata=user=000000000;type=soc_sec
+````
+
 #### Screenshot
 ![Example Screenshot](sample.png?raw=true?v=1 "Example Screenshot")
