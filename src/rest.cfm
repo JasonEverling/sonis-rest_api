@@ -51,19 +51,21 @@
         if (session.retries >= webopt.login_retries) {
             locked = objLogin.disableLogin(session.apiUser);
             if (!locked) {
-                writeOutput("'{Return Code"": 417, ""Details"": ""Expectation Failed"", ""Extended"": ""Please contact the site administrator""}'");
+                msg = utils.createHttpMsg(417, "Expectation Failed", "Please contact the site administrator");
+                writeOutput(msg);
                 exit;
             }
         }
         // Check if disabled or locked
         isDisabled = objLogin.verifyCredentials(session.apiUser, variables.apiToken, '', 'security');
         if (isDisabled) {
-            variables.result = '{"Return Code": 401, "Details": "Account Disabled"}';
+            variables.result = utils.createHttpMsg(401, "Account Disabled");
         } else if (!isAuthenticated) {
-                if (isDefined('session.retries') && session.retries >= 0) {
-                    session.retries = session.retries + 1;
-                }
-                variables.result = '{"Return Code": 401, "Details": "Unauthorized"}';
+            if (isDefined('session.retries') && session.retries >= 0) {
+                session.retries = session.retries + 1;
+            }
+
+            variables.result = utils.createHttpMsg(401, "Unauthorized");
         } else {
             // We got a authorization, hooray, let's return some data
             session.retries = 0;
