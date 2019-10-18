@@ -1,101 +1,106 @@
-<!--- not used in prod
-<cfinclude template = "common/rest/header.cfm" />
---->
-<!--- Setup the request --->
+<!--- The Sonis RESTFul API Endpoint--->
 <cfscript>
-    cfheader(name="Content-Type", value="application/json;charset=UTF-8");
-    objValid = CreateObject("component", "CFC.rest.validate");
-    sessionLength = objValid.validateSession();
-    hasHeaders = objValid.validateHeaders();
-    if (!isBoolean(hasHeaders)) {
-        return hasHeaders;
-        exit;
-    }
+        //include "common/rest/header.cfm"; // Not used in prod
+        // Setup the request
+        cfheader(name = "Content-Type", value = "application/json;charset=UTF-8");
+        objValid = CreateObject("component", "CFC.rest.validate");
+        utils = CreateObject("component", "CFC.rest.utils");
+        sessionLength = objValid.validateSession();
+        hasHeaders = objValid.validateHeaders();
+        if (!isBoolean(hasHeaders)) {
+            return hasHeaders;
+            exit;
+        }
+        // Setup vars
+        session.dsname = "#sonis.ds#";
+        session.wwwroot = ExpandPath("./");
+        session.apiUser = lCase(getHttpRequestData().headers["X-SONIS-USER"]);
+        variables.apiToken = getHttpRequestData().headers["X-SONIS-PWD"];
+        variables.output = "";
+        variables.action = "";
+        if (getHTTPRequestData().method == 'GET') {
+            variables.action = "GET";
+            variables.object = url.object;
+            variables.method = url.method;
+            variables.builtin = url.builtin;
+            variables.argumentdata = utils.listToStruct(url.argumentdata);
+        }
+        if (getHTTPRequestData().method == 'POST') {
+            variables.action = "POST";
+            variables.apiJSON = getHTTPRequestData().content;
+            variables.apiData = deserializeJSON(ToString(apiJSON));
+            // Build local variables from JSON data
+            for (key in apiData) {
+                "#key#" = "#apiData[key]#";
+            }
+        }
+
+        variables.contentType = "application/json;charset=UTF-8";
+        if (!isDefined('session.retries')) {
+            session.retries = 0;
+        }
+        // Object is a builtin Sonis function
+        if (!isDefined('builtin')) {
+            variables.builtin = false;
+        }
+
+        // Begin authorization sequence
+        objLogin = CreateObject("component", "CFC.rest.login");
+        isAuthenticated = objLogin.apiAuthorization(variables.apiToken);
+        // Throttle login attempts
+        if (session.retries >= webopt.login_retries) {
+            locked = objLogin.disableLogin(session.apiUser);
+            if (!locked) {
+                writeOutput("'{Return Code"": 417, ""Details"": ""Expectation Failed"", ""Extended"": ""Please contact the site administrator""}'");
+                exit;
+            }
+        }
+        // Check if disabled or locked
+        isDisabled = objLogin.verifyCredentials(session.apiUser, variables.apiToken, '', 'security');
+        if (isDisabled) {
+            variables.result = '{"Return Code": 401, "Details": "Account Disabled"}';
+        } else if (!isAuthenticated) {
+                if (isDefined('session.retries') && session.retries >= 0) {
+                    session.retries = session.retries + 1;
+                }
+                variables.result = '{"Return Code": 401, "Details": "Unauthorized"}';
+        } else {
+            // We got a authorization, hooray, let's return some data
+            session.retries = 0;
+            if (!builtin) {
+                cfinvoke(component = "CFC.rest.#object#", method = "#method#", returnvariable = "result") {
+                    if (variables.action == 'GET') {
+                        for (i in variables.argumentdata) {
+                            cfinvokeargument(name = i, value = argumentdata[i]);
+                        }
+                    }
+                    if (variables.action == 'POST') {
+                        for (i in apiData.argumentdata) {
+                            cfinvokeargument(name = i, value = apiData.argumentdata[i]);
+                        }
+                    }
+                };
+            } else {
+                cfinvoke(component = "CFC.rest.#object#", method = "#method#", returnvariable = "result") {
+                    cfinvokeargument(name = sonis_ds, value = sonis.ds);
+                    cfinvokeargument(name = MainDir, value = MainDir);
+                    if (variables.action == 'GET') {
+                        for (i in variables.argumentdata) {
+                            cfinvokeargument(name = i, value = argumentdata[i]);
+                        }
+                    }
+                    if (variables.action == 'POST') {
+                        for (i in apiData.argumentdata) {
+                            cfinvokeargument(name = i, value = apiData.argumentdata[i]);
+                        }
+                    }
+                };
+            }
+        }
+        if (isQuery(variables.result)) {
+            writeOutput(serializeJSON(variables.result, "struct"));
+        } else {
+            writeOutput(variables.result);
+        }
+        //include "common/rest/footer.cfm"; // Not used in prod
 </cfscript>
-
-<cfset session.dsname = "#sonis.ds#" />
-<cfset session.wwwroot = ExpandPath( "./" ) />
-<cfset session.apiUser = lCase(getHttpRequestData().headers["X-SONIS-USER"]) />
-<cfset variables.apiToken = getHttpRequestData().headers["X-SONIS-PWD"] />
-<cfset variables.apiJSON = getHTTPRequestData().content />
-<cfset variables.apiData = deserializeJSON(ToString(apiJSON)) />
-<cfset variables.contentType = "application/json;charset=UTF-8" />
-<cfif NOT isDefined('session.retries')>
-    <cfset session.retries = 0 />
-</cfif>
-
-<!--- Object is a builtin Sonis function --->
-<cfif NOT isDefined('builtin')>
-    <cfset variables.builtin = false />
-</cfif>
-
-<!--- Build local variables from JSON data --->
-<cfloop collection="#apiData#" item="key">
-    <cfset "#key#" = "#apiData[key]#" />
-</cfloop>
-
-<!--- Get authorization to continue --->
-<cfinvoke component = "CFC.rest.login" method = "apiAuthorization" returnvariable = "isAuthenticated">
-        <cfinvokeargument name = "token"  value = '#apiToken#' />
-</cfinvoke>
-
-<!--- Throttle login attempts --->
-<cfif #session.retries# GTE #webopt.login_retries#>
-    <cfinvoke component = "CFC.rest.login" method = "disableLogin" returnvariable = "locked">
-        <cfinvokeargument name = "user"  value = '#session.apiUser#' />
-    </cfinvoke>
-    <cfif NOT #locked#>
-        <cfoutput>
-            '{Return Code": 417, "Details": "Expectation Failed", "Extended": "Please contact the site administrator"}'
-        </cfoutput>
-        <cfabort>
-    </cfif>
-</cfif>
-
-<!--- Check if disabled or locked --->
-<cfinvoke component = "CFC.rest.login" method = "verifyCredentials" returnvariable = "isDisabled">
-    <cfinvokeargument name = "user"  value = '#session.apiUser#' />
-    <cfinvokeargument name = "password"  value = '#variables.apiToken#' />
-    <cfinvokeargument name = "type"  value = '' />
-    <cfinvokeargument name = "credential"  value = 'security' />
-</cfinvoke>
-
-<cfif #isDisabled#>
-    <cfset variables.result = '{"Return Code": 401, "Details": "Account Disabled"}' />
-<cfelseif '#isAuthenticated#' eq false>
-    <cfif isDefined('session.retries') AND #session.retries# GTE 0>
-        <cfset session.retries = #session.retries# + 1>
-    </cfif>
-    <cfset variables.result = '{"Return Code": 401, "Details": "Unauthorized"}' />
-<cfelse>
-<!--- We got a authorization, hooray --->
-    <cfset session.retries = 0 />
-    <cfif '#builtin#' eq false>
-        <cfinvoke component = "CFC.rest.#object#" method = "#method#" returnvariable = "result">
-            <cfloop collection="#apiData.argumentdata#" item="i">
-                <cfinvokeargument name = "#i#" value = "#apiData.argumentdata[i]#" />
-            </cfloop>
-        </cfinvoke>
-    <cfelse>
-        <cfinvoke component = "CFC.#object#" method = "#method#" returnvariable = "result">
-            <cfinvokeargument name = "sonis_ds" value = '#sonis.ds#' />
-            <cfinvokeargument name = "MainDir" value = '#MainDir#' />
-            <cfloop collection="#apiData.argumentdata#" item="i">
-                <cfinvokeargument name = "#i#" value = "#apiData.argumentdata[i]#" />
-            </cfloop>
-        </cfinvoke>
-    </cfif>
-</cfif>
-
-<cfif isQuery(result)>
-    <cfoutput>
-        #serializeJSON(result, "struct")#
-    </cfoutput>
-<cfelse>
-    <cfoutput>
-        #result#
-    </cfoutput>
-</cfif>
-<!--- not used in prod
-<cfinclude template="common/rest/footer.cfm" />
---->
