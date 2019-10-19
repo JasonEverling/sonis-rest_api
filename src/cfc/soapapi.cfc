@@ -65,7 +65,7 @@ component displayname="soapapi" author="Jason Everling" hint="Sonis SOAP API End
                 }
                 if (this.returns == 'no') {
                     // Cleanup whitespaces, line feeds and carriage returns
-                    return REReplace(this.apiData, "[\s]+", "Chr(13)##Chr(10)", "ALL");
+                    return REReplace(this.apiData, "[\s]+", "Chr(13)Chr(10)", "ALL");
                 } else if (this.returns == 'yes') {
                     return getresults;
                 } else {
