@@ -54,15 +54,18 @@ component displayname="soapapi" author="Jason Everling" hint="Sonis SOAP API End
                 session.retries = 0;
                 savecontent variable="result" {
                     cfinvoke(component = comp, method = meth, returnvariable = "getresults") {
+                        // Sonis methods require sonis_ds and MainDir, let's just pass them
                         cfinvokeargument(name = 'sonis_ds', value = session.dsname);
                         cfinvokeargument(name = 'MainDir', value = MainDir);
+                        // Loop through argumentdata and set for the method
                         for (i = 1; i <= ArrayLen(this.apiData); i++) {
                             cfinvokeargument(name = this.apiData[i][1], value = this.apiData[i][2]);
                         }
                     }
                 }
                 if (this.returns == 'no') {
-                    return REReplace(#data#, "[\s]+", "#chr(13)##chr(10)#", "ALL");
+                    // Cleanup whitespaces, line feeds and carriage returns
+                    return REReplace(this.apiData, "[\s]+", "Chr(13)##Chr(10)", "ALL");
                 } else if (this.returns == 'yes') {
                     return getresults;
                 } else {
@@ -71,9 +74,9 @@ component displayname="soapapi" author="Jason Everling" hint="Sonis SOAP API End
             }
         } catch (any e) {
             savecontent variable="result" {
-                error_type = rtrim(#e.type#);
-                error_msg = rtrim(#e.message#);
-                error_detail = rtrim(#e.detail#);
+                error_type = rtrim(e.type);
+                error_msg = rtrim(e.message);
+                error_detail = rtrim(e.detail);
                 writeOutput("Error Type: " & error_type & Chr(10) & "Error Message: " & error_msg & Chr(10) & "Error Detail: " & error_detail);
             }
         }

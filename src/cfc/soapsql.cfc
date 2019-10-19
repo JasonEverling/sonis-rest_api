@@ -48,7 +48,7 @@ component displayname="soapsql" author="Jason Everling" hint="Sonis SOAP SQL End
                 // Authorized
                 session.retries = 0;
                 stmt = new query();
-                stmt.setDatasource("#session.dsname#");
+                stmt.setDatasource(session.dsname);
                 stmt.SetName("stmt");
                 qry = replaceNoCase(this.sql, ';', 'all');
                 qry = replaceNoCase(qry, 'ALTER', 'all');
@@ -58,9 +58,9 @@ component displayname="soapsql" author="Jason Everling" hint="Sonis SOAP SQL End
             }
         } catch (any e) {
             savecontent variable="result" {
-                error_type = rtrim(#e.type#);
-                error_msg = rtrim(#e.message#);
-                error_detail = rtrim(#e.detail#);
+                error_type = rtrim(e.type);
+                error_msg = rtrim(e.message);
+                error_detail = rtrim(e.detail);
                 writeOutput("Error Type: " & error_type & Chr(10) & "Error Message: " & error_msg & Chr(10) & "Error Detail: " & error_detail);
             }
         }
