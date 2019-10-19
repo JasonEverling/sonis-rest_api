@@ -1,6 +1,7 @@
 ## Jenzabar Sonis RESTful API Addon
 An addon for Sonis that allows a Restful type experience using JSON to send and receive. New functions added as well as the built-in Sonis functions can be called.
 
+###### Note: This will also update the soapsql and soapapi components with an improved version for backward compatibility with older clients that only support SOAP.
 #### Installation
 Copy everything in the src/ folder to your Sonis directory. It will ask about folder merge because we are adding content to the Sonis /common folder.
 
