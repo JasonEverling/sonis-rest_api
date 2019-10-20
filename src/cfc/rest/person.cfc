@@ -2,6 +2,7 @@ component displayname="person" author="Jason Everling" hint="Functions related t
 {
 
     utils = CreateObject("component", "utils");
+    cfobject(name="name", component="name");
 
     /**
      * Returns the details of a person
@@ -11,7 +12,7 @@ component displayname="person" author="Jason Everling" hint="Functions related t
      * @type Type of identifier, soc_sec, ldap, or email
      * @return array
      */
-    public function getDetails(required string user, required string type)
+    public function getAttributes(required string user, required string type)
     {
         if (type == "soc_sec") {
             filter = "WHERE n.soc_sec = :user";
@@ -23,7 +24,7 @@ component displayname="person" author="Jason Everling" hint="Functions related t
             return utils.createHttpMsg(400, "Bad Request");
         }
         sql = new query();
-        sql.setDatasource("#session.dsname#");
+        sql.setDatasource(session.dsname);
         sql.SetName("sql");
         sql.addParam(name="user",value=user,cfsqltype="varchar");
         stmt = "SELECT rtrim(n.soc_sec) as soc_sec, rtrim(n.last_name) as last_name, rtrim(n.first_name) as first_name, rtrim(n.mi) as mi, n.disabled, rtrim(n.prefix) as prefix, rtrim(n.suffix) as suffix, rtrim(n.maiden) as maiden, CONVERT(VARCHAR, n.birthdate, 23) AS birthdate, dbo.udf_getAge(n.birthdate, GETDATE()) AS age, n.citizen, n.gender, rtrim(g.gender_txt) as gender_txt, rtrim(n.ethnic_cod) as ethnic_cod, rtrim(e.ethnic_txt) as ethnic_txt,
@@ -68,7 +69,7 @@ component displayname="person" author="Jason Everling" hint="Functions related t
             return utils.createHttpMsg(204, "No Change");
         }
         sql = new query();
-        sql.setDatasource("#session.dsname#");
+        sql.setDatasource(session.dsname);
         sql.SetName("sql");
         sql.addParam(name = "user", value = user, cfsqltype = "varchar");
         sql.addParam(name = "password", value = password, cfsqltype = "varchar");
@@ -81,48 +82,6 @@ component displayname="person" author="Jason Everling" hint="Functions related t
             return utils.createHttpMsg(202, "Accepted");
         }
         return utils.createHttpMsg(204, "No Change");
-    }
-
-    /**
-    * Updates a persons attribute
-    *
-    * @author Jason A. Everling
-    * @user Username
-    * @type Type of username, either soc_sec, ldap, or email
-    * @attribute The attribute being updated
-    * @value The attribute value
-    * @return boolean
-    */
-    public function updateName(required string user, required string type, required string attribute, required string newvalue)
-    {
-        if (type == "soc_sec") {
-            filter = "WHERE soc_sec = :user";
-        } else if (type == "ldap") {
-            filter = "WHERE ldap_id = :user";
-        } else if (type == "email") {
-            filter = "FROM name n INNER JOIN address a ON n.soc_sec = a.soc_sec AND a.preferred = '1' WHERE a.email = :user";
-        } else {
-            return utils.createHttpMsg(400, "Bad Request");
-        }
-        sql = new query();
-        sql.setDatasource("#session.dsname#");
-        sql.SetName("sql");
-        sql.addParam(name = "user", value = user, cfsqltype = "varchar");
-        sql.addParam(name = "attribute", value = attribute, cfsqltype = "varchar");
-        sql.addParam(name = "newvalue", value = newvalue, cfsqltype = "varchar");
-        columnNames = sql.execute(sql = "SELECT TOP 1 * FROM name").getResult().ColumnList;
-        validColumn = listFind(columnNames, uCase(attribute));
-        if (validColumn > 0) {
-            stmt = "UPDATE name
-                    SET " & attribute & " = :newvalue " & filter & " SELECT @@RowCount AS affected";
-            result = sql.execute(sql = stmt).getResult();
-            if (result.affected > 0) {
-                return utils.createHttpMsg(202, "Accepted");
-            }
-            return utils.createHttpMsg(204, "No Change");
-        } else {
-            return utils.createHttpMsg(400, "Bad Request");
-        }
     }
 
     /**
@@ -141,7 +100,7 @@ component displayname="person" author="Jason Everling" hint="Functions related t
             isSecurity = true;
         }
         sql = new query();
-        sql.setDatasource("#session.dsname#");
+        sql.setDatasource(session.dsname);
         sql.SetName("sql");
         sql.addParam(name = "user", value = user, cfsqltype = "varchar");
         sql.addParam(name = "password", value = password, cfsqltype = "varchar");
