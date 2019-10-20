@@ -11,7 +11,7 @@ component displayname="soapsql" author="Jason Everling" hint="Sonis SOAP SQL End
     * @author Jason A. Everling
     * @user api username
     * @pass api password
-    * @sql sql statement
+    * @sql sql statement, you are responsible for injection prevention
     * @todo Create better injection detection so were not relying on the client
     * @return array|mixed the sql results
     */
@@ -50,18 +50,35 @@ component displayname="soapsql" author="Jason Everling" hint="Sonis SOAP SQL End
                 stmt = new query();
                 stmt.setDatasource(session.dsname);
                 stmt.SetName("stmt");
-                qry = replaceNoCase(this.sql, ';', 'all');
-                qry = replaceNoCase(qry, 'ALTER', 'all');
-                qry = replaceNoCase(qry, 'DROP', 'all');
-                qry = replaceNoCase(qry, 'TRUNCATE', 'all');
-                result = stmt.execute(sql = qry).getResult();
+                eval = ReFindNoCase(
+                        "([^a-zA-Z]ALTER[^a-zA-Z]|
+                        [^a-zA-Z]CREATE[^a-zA-Z]|
+                        [^a-zA-Z]DELETE[^a-zA-Z]|
+                        [^a-zA-Z]EXEC[^a-zA-Z]|
+                        [^a-zA-Z]EXECUTE[^a-zA-Z]|
+                        [^a-zA-Z]DROP[^a-zA-Z]|
+                        [^a-zA-Z]INSERT[^a-zA-Z]|
+                        [^a-zA-Z]UPDATE[^a-zA-Z]|
+                        [^a-zA-Z]TRUNCATE[^a-zA-Z])",
+                        this.sql,
+                        ,
+                        "ALL");
+                if (eval == 0) {
+                    result = stmt.execute(sql = qry).getResult();
+                } else {
+                    throw(type = "Invalid Statement", message = "Check your SQL statement for invalid characters");
+                }
             }
         } catch (any e) {
             savecontent variable="result" {
                 error_type = rtrim(e.type);
                 error_msg = rtrim(e.message);
                 error_detail = rtrim(e.detail);
-                writeOutput("Error Type: " & error_type & Chr(10) & "Error Message: " & error_msg & Chr(10) & "Error Detail: " & error_detail);
+                error_code = rtrim(e.nativeerrorcode);
+                error_state = rtrim(e.sqlstate);
+                error_sql = rtrim(e.sql);
+                error_query = rtrim(e.queryerror);
+                writeOutput("Error Type: " & error_type & Chr(10) & "Error Message: " & error_msg & Chr(10) & "Error Detail: " & error_detail & Chr(10) & "Error Code" & error_code & Chr(10) & "Error State" & error_state & Chr(10) & "Error SQL" & error_sql & Chr(10) & "Error Query" & error_query & Chr(10));
             }
         }
         return result;
