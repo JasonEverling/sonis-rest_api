@@ -1,4 +1,4 @@
-component displayname="people" author="Jason Everling" hint="Functions related to the person" extends="person" output="false"
+component displayname="people" author="Jason Everling" hint="Functions related multiple persons" extends="person" output="false"
 {
 
 }
