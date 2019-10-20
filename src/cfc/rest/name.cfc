@@ -1,6 +1,7 @@
 component displayname="name" author="Jason Everling" hint="Functions related to the name table" output="false"
 {
 
+    db = CreateObject("component", "database");
     utils = CreateObject("component", "utils");
 
     /**
@@ -23,26 +24,21 @@ component displayname="name" author="Jason Everling" hint="Functions related to 
         } else {
             return utils.createHttpMsg(400, "Bad Request");
         }
-        sql = new query();
-        sql.setDatasource(session.dsname);
-        sql.SetName("sql");
-        sql.addParam(name = "user", value = user, cfsqltype = "varchar");
-        sql.addParam(name = "attribute", value = attribute, cfsqltype = "varchar");
-        columnNames = sql.execute(sql = "SELECT TOP 1 * FROM name").getResult().ColumnList;
-        validColumn = listFind(columnNames, uCase(attribute));
-        if (validColumn > 0) {
+        if (utils.isValidAttribute(attribute, "name")) {
+            params = [["user", user],["attribute", attribute]];
             stmt = "OPEN SYMMETRIC KEY SSN_Key_01
                     DECRYPTION BY CERTIFICATE SSN
                     SELECT rtrim(" & attribute & ") as " & attribute & " " & "
                     FROM name " & filter;
-            result = sql.execute(sql = stmt).getResult();
+            result = db.execQuery(stmt, params);
         } else {
             result = utils.createHttpMsg(400, "Bad Request");
         }
         return result;
     }
+
     /**
-    * Updates a persons attribute
+    * Updates a persons name attribute
     *
     * @author Jason A. Everling
     * @user Username
@@ -62,18 +58,11 @@ component displayname="name" author="Jason Everling" hint="Functions related to 
         } else {
             return utils.createHttpMsg(400, "Bad Request");
         }
-        sql = new query();
-        sql.setDatasource(session.dsname);
-        sql.SetName("sql");
-        sql.addParam(name = "user", value = user, cfsqltype = "varchar");
-        sql.addParam(name = "attribute", value = attribute, cfsqltype = "varchar");
-        sql.addParam(name = "newvalue", value = newvalue, cfsqltype = "varchar");
-        columnNames = sql.execute(sql = "SELECT TOP 1 * FROM name").getResult().ColumnList;
-        validColumn = listFind(columnNames, uCase(attribute));
-        if (validColumn > 0) {
+        if (utils.isValidAttribute(attribute, "name")) {
+            params = [["user", user],["attribute", attribute],["newvalue", newvalue]];
             stmt = "UPDATE name
                     SET " & attribute & " = :newvalue " & filter & " SELECT @@RowCount AS affected";
-            result = sql.execute(sql = stmt).getResult();
+            result = db.execQuery(stmt, params);
             if (result.affected > 0) {
                 return utils.createHttpMsg(202, "Accepted");
             }
@@ -82,4 +71,5 @@ component displayname="name" author="Jason Everling" hint="Functions related to 
             return utils.createHttpMsg(400, "Bad Request");
         }
     }
+
 }
