@@ -120,4 +120,17 @@ component displayname="utils" author="Jason Everling" hint="Utility Functions fo
         }
         return result;
     }
+
+    public function isValidAttribute(required string attribute, required string table)
+    {
+        db = CreateObject("component", "database");
+        validColumn = false;
+        qry = db.execQuery("SELECT TOP 1 * FROM " & table);
+        columnNames = qry.ColumnList;
+        validColumn = listFind(columnNames, uCase(attribute));
+        if (validColumn > 0) {
+            return true;
+        }
+        return false;
+    }
 }
