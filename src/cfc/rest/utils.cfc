@@ -1,4 +1,11 @@
-component displayname="utils" author="Jason Everling" hint="Utility Functions for API processing" output="false"
+/**
+* Utility Functions
+*
+* @displayname Utils
+* @hint Various utilities that can be reused in various functions
+* @author Jason A. Everling
+*/
+component output="false"
 {
 
     /**

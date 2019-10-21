@@ -1,4 +1,11 @@
-component displayname="login" author="Jason Everling" hint="Functions related to authentication" output="false"
+/**
+* Authentication Functions
+*
+* @displayname Login
+* @hint Functions related to authentication
+* @author Jason A. Everling
+*/
+component output="false"
 {
 
     db = CreateObject("component", "database");
@@ -60,7 +67,7 @@ component displayname="login" author="Jason Everling" hint="Functions related to
     * @credential Set to "security" if validating security credentials, blank otherwise
     * @return boolean true or false
     */
-    public function verifyCredentials(required string user, required string password, required string type, string credential)
+    public function verifyCredentials(required string user, required string password, required string type, string credential = "")
     {
 
         isSecurity = false;
@@ -68,16 +75,16 @@ component displayname="login" author="Jason Everling" hint="Functions related to
             isSecurity = true;
         }
         if (type == "soc_sec") {
-            filter = "WHERE n.soc_sec = :user AND n.pin = :password AND n.disabled = '0'";
+            where = "WHERE n.soc_sec = :user AND n.pin = :password AND n.disabled = '0'";
         } else if (type == "ldap") {
-            filter = "WHERE n.ldap_id = :user AND n.pin = :password AND n.disabled = '0'";
+            where = "WHERE n.ldap_id = :user AND n.pin = :password AND n.disabled = '0'";
         } else if (type == "email") {
-            filter = "INNER JOIN address a ON n.soc_sec = a.soc_sec AND a.preferred = '1' WHERE a.e_mail = :user AND n.pin = :password AND n.disabled = '0'";
+            where = "INNER JOIN address a ON n.soc_sec = a.soc_sec AND a.preferred = '1' WHERE a.e_mail = :user AND n.pin = :password AND n.disabled = '0'";
         } else {
             return false;
         }
         params = [["user", session.apiUser],["password", password]];
-        stmt = "SELECT n.soc_sec, n.disabled, CONVERT(char, DECRYPTBYKEYAUTOCERT(CERT_ID('SSN'), NULL, n.PIN)) AS pin FROM name n " & filter;
+        stmt = "SELECT n.soc_sec, n.disabled, CONVERT(char, DECRYPTBYKEYAUTOCERT(CERT_ID('SSN'), NULL, n.PIN)) AS pin FROM name n " & where;
         if (isSecurity) {
             stmt = "SELECT s.user_id, s.disabled, CONVERT(char, DECRYPTBYKEYAUTOCERT(CERT_ID('SSN'), NULL, s.password)) AS password
                     FROM security s

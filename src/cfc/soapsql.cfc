@@ -1,4 +1,13 @@
-component displayname="soapsql" author="Jason Everling" hint="Sonis SOAP SQL Endpoint" output="false"
+/**
+* Sonis SOAP SQL Endpoint
+*
+* @displayname SoapSQL
+* @hint Run sql statements over the SOAP endpoint
+* @wsVersion 1
+* @author Jason A. Everling
+* @todo Cleanup, deduplication. Update to support version 2 of axis.
+*/
+component output="false"
 {
 
     this.utils = CreateObject("component", "CFC.rest.utils");
@@ -17,7 +26,7 @@ component displayname="soapsql" author="Jason Everling" hint="Sonis SOAP SQL End
     */
     remote any function doSQLSomething(required string user="", required string pass="", required string sql="") output=false {
         try {
-            include "../../application.cfm";
+            include "../application.cfm";
             this.objValid.validateSession();
             session.dsname = sonis.ds;
             session.apiUser = lCase(user);
@@ -61,11 +70,19 @@ component displayname="soapsql" author="Jason Everling" hint="Sonis SOAP SQL End
                 error_type = rtrim(e.type);
                 error_msg = rtrim(e.message);
                 error_detail = rtrim(e.detail);
-                error_code = rtrim(e.nativeerrorcode);
-                error_state = rtrim(e.sqlstate);
-                error_sql = rtrim(e.sql);
-                error_query = rtrim(e.queryerror);
-                writeOutput("Error Type: " & error_type & Chr(10) & "Error Message: " & error_msg & Chr(10) & "Error Detail: " & error_detail & Chr(10) & "Error Code" & error_code & Chr(10) & "Error State" & error_state & Chr(10) & "Error SQL" & error_sql & Chr(10) & "Error Query" & error_query & Chr(10));
+                if (compareNoCase(e.type,"database") == 0) {
+                    error_code = rtrim(e.nativeerrorcode);
+                    error_state = rtrim(e.sqlstate);
+                    error_sql = rtrim(e.sql);
+                    error_query = rtrim(e.queryerror);
+                } else {
+                    error_code = "";
+                    error_state = "";
+                    error_sql = "";
+                    error_query = "";
+                }
+                msg = '{"Error Type": "#error_type#", "Error Message": "#error_msg#", "Error Detail": "#error_detail#", "Error Code": "#error_code#", "Error State": "#error_state#", "Error SQL": "#error_sql#", "Error Query": "#error_query#"}';
+                writeOutput(msg);
             }
         }
         return result;

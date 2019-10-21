@@ -1,4 +1,11 @@
-component displayname="person" author="Jason Everling" hint="Functions related to the person" output="false"
+/**
+* Person Functions
+*
+* @displayname Person
+* @hint Functions related to the person
+* @author Jason A. Everling
+*/
+component output="false"
 {
 
     db = createObject("component", "database");
@@ -15,11 +22,11 @@ component displayname="person" author="Jason Everling" hint="Functions related t
     public function getPersonAttributes(required string user, required string type, required boolean includePIN = false)
     {
         if (type == "soc_sec") {
-            filter = "WHERE n.soc_sec = :user";
+            where = "WHERE n.soc_sec = :user";
         } else if (type == "ldap") {
-            filter = "WHERE n.ldap_id = :user";
+            where = "WHERE n.ldap_id = :user";
         } else if (type == "email") {
-            filter = "WHERE a.e_mail = :user OR a.e_mail2 = :user";
+            where = "WHERE a.e_mail = :user OR a.e_mail2 = :user";
         } else {
             return utils.createHttpMsg(400, "Bad Request");
         }
@@ -44,7 +51,7 @@ component displayname="person" author="Jason Everling" hint="Functions related t
                         LEFT JOIN campus c ON n.camp_cod = c.camp_cod
                         LEFT JOIN division d ON n.div_cod = d.div_cod
                         LEFT JOIN dept ON n.dept_cod = dept.dept_cod
-                        LEFT JOIN level_ l ON n.level_ = l.level_ " & filter;
+                        LEFT JOIN level_ l ON n.level_ = l.level_ " & where;
         result = db.execQuery(stmt, params);
         return result;
     }
@@ -62,11 +69,11 @@ component displayname="person" author="Jason Everling" hint="Functions related t
     {
 
         if (type == "soc_sec") {
-            filter = "WHERE soc_sec = :user";
+            where = "WHERE soc_sec = :user";
         } else if (type == "ldap") {
-            filter = "WHERE ldap_id = :user";
+            where = "WHERE ldap_id = :user";
         } else if (type == "email") {
-            filter = "FROM name n INNER JOIN address a ON n.soc_sec = a.soc_sec AND a.preferred = '1' WHERE a.email = :user";
+            where = "FROM name n INNER JOIN address a ON n.soc_sec = a.soc_sec AND a.preferred = '1' WHERE a.email = :user";
         } else {
             return utils.createHttpMsg(204, "No Change");
         }
@@ -74,7 +81,7 @@ component displayname="person" author="Jason Everling" hint="Functions related t
         stmt = "OPEN SYMMETRIC KEY SSN_Key_01
                 DECRYPTION BY CERTIFICATE SSN
                 UPDATE name
-                SET pin = EncryptByKey(Key_Guid('SSN_Key_01'),:password) " & filter & " SELECT @@RowCount AS affected";
+                SET pin = EncryptByKey(Key_Guid('SSN_Key_01'),:password) " & where & " SELECT @@RowCount AS affected";
         result = db.execQuery(stmt, params);
         if (result.affected > 0) {
             return utils.createHttpMsg(202, "Accepted");
@@ -98,16 +105,16 @@ component displayname="person" author="Jason Everling" hint="Functions related t
             isSecurity = true;
         }
         if (type == "soc_sec") {
-            filter = "WHERE n.soc_sec = :user AND n.pin = :password AND n.disabled = '0'";
+            where = "WHERE n.soc_sec = :user AND n.pin = :password AND n.disabled = '0'";
         } else if (type == "ldap") {
-            filter = "WHERE n.ldap_id = :user AND n.pin = :password AND n.disabled = '0'";
+            where = "WHERE n.ldap_id = :user AND n.pin = :password AND n.disabled = '0'";
         } else if (type == "email") {
-            filter = "INNER JOIN address a ON n.soc_sec = a.soc_sec AND a.preferred = '1' WHERE a.e_mail = :user AND n.pin = :password AND n.disabled = '0'";
+            where = "INNER JOIN address a ON n.soc_sec = a.soc_sec AND a.preferred = '1' WHERE a.e_mail = :user AND n.pin = :password AND n.disabled = '0'";
         } else {
             return utils.createHttpMsg(400, "Bad Request");
         }
         params = [["user", user],["password", password]];
-        stmt = "SELECT n.soc_sec, n.disabled, CONVERT(char, DECRYPTBYKEYAUTOCERT(CERT_ID('SSN'), NULL, n.PIN)) AS pin FROM name n " & filter;
+        stmt = "SELECT n.soc_sec, n.disabled, CONVERT(char, DECRYPTBYKEYAUTOCERT(CERT_ID('SSN'), NULL, n.PIN)) AS pin FROM name n " & where;
         if (isSecurity) {
             stmt = "SELECT s.user_id, s.disabled, CONVERT(char, DECRYPTBYKEYAUTOCERT(CERT_ID('SSN'), NULL, s.password)) AS password
                     FROM security s

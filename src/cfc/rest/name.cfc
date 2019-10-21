@@ -1,4 +1,11 @@
-component displayname="name" author="Jason Everling" hint="Functions related to the name table" output="false"
+/**
+* Name Functions
+*
+* @displayname Name
+* @hint Functions related to the name table
+* @author Jason A. Everling
+*/
+component extends="person" output="false"
 {
 
     db = CreateObject("component", "database");
@@ -16,11 +23,11 @@ component displayname="name" author="Jason Everling" hint="Functions related to 
     public function getNameAttribute(required string user, required string type, required string attribute)
     {
         if (type == "soc_sec") {
-            filter = "WHERE soc_sec = :user";
+            where = "WHERE soc_sec = :user";
         } else if (type == "ldap") {
-            filter = "WHERE ldap_id = :user";
+            where = "WHERE ldap_id = :user";
         } else if (type == "email") {
-            filter = "INNER JOIN address a ON name.soc_sec = a.soc_sec AND a.preferred = '1' WHERE a.email = :user";
+            where = "INNER JOIN address a ON name.soc_sec = a.soc_sec AND a.preferred = '1' WHERE a.email = :user";
         } else {
             return utils.createHttpMsg(400, "Bad Request");
         }
@@ -29,7 +36,7 @@ component displayname="name" author="Jason Everling" hint="Functions related to 
             stmt = "OPEN SYMMETRIC KEY SSN_Key_01
                     DECRYPTION BY CERTIFICATE SSN
                     SELECT rtrim(" & attribute & ") as " & attribute & " " & "
-                    FROM name " & filter;
+                    FROM name " & where;
             result = db.execQuery(stmt, params);
         } else {
             result = utils.createHttpMsg(400, "Bad Request");
@@ -50,18 +57,18 @@ component displayname="name" author="Jason Everling" hint="Functions related to 
     public function updateNameAttribute(required string user, required string type, required string attribute, required string newvalue)
     {
         if (type == "soc_sec") {
-            filter = "WHERE soc_sec = :user";
+            where = "WHERE soc_sec = :user";
         } else if (type == "ldap") {
-            filter = "WHERE ldap_id = :user";
+            where = "WHERE ldap_id = :user";
         } else if (type == "email") {
-            filter = "FROM name n INNER JOIN address a ON n.soc_sec = a.soc_sec AND a.preferred = '1' WHERE a.email = :user";
+            where = "FROM name n INNER JOIN address a ON n.soc_sec = a.soc_sec AND a.preferred = '1' WHERE a.email = :user";
         } else {
             return utils.createHttpMsg(400, "Bad Request");
         }
         if (utils.isValidAttribute(attribute, "name")) {
             params = [["user", user],["attribute", attribute],["newvalue", newvalue]];
             stmt = "UPDATE name
-                    SET " & attribute & " = :newvalue " & filter & " SELECT @@RowCount AS affected";
+                    SET " & attribute & " = :newvalue " & where & " SELECT @@RowCount AS affected";
             result = db.execQuery(stmt, params);
             if (result.affected > 0) {
                 return utils.createHttpMsg(202, "Accepted");
