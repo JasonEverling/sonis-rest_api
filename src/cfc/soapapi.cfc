@@ -30,7 +30,7 @@ component output="false"
     remote any function doAPISomething(required string user="", required string pass="", required string comp="", required string meth="", string hasReturnVariable="yes", required array argumentdata="") output=false {
 
         try {
-            include "../../application.cfm";
+            include "../application.cfm";
             this.objValid.validateSession(); // Validate api session, shorter than app defined
             session.dsname = sonis.ds;
             session.apiUser = lCase(user);
