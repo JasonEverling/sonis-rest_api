@@ -60,7 +60,7 @@ component displayname="login" author="Jason Everling" hint="Functions related to
     * @credential Set to "security" if validating security credentials, blank otherwise
     * @return boolean true or false
     */
-    public function verifyCredentials(required string user, required string password, required string type, string credential)
+    public function verifyCredentials(required string user, required string password, required string type, string credential = "")
     {
 
         isSecurity = false;
