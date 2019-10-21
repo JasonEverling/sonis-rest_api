@@ -50,24 +50,11 @@ component displayname="soapsql" author="Jason Everling" hint="Sonis SOAP SQL End
                 stmt = new query();
                 stmt.setDatasource(session.dsname);
                 stmt.SetName("stmt");
-                eval = ReFindNoCase(
-                        "([^a-zA-Z]ALTER[^a-zA-Z]|
-                        [^a-zA-Z]CREATE[^a-zA-Z]|
-                        [^a-zA-Z]DELETE[^a-zA-Z]|
-                        [^a-zA-Z]EXEC[^a-zA-Z]|
-                        [^a-zA-Z]EXECUTE[^a-zA-Z]|
-                        [^a-zA-Z]DROP[^a-zA-Z]|
-                        [^a-zA-Z]INSERT[^a-zA-Z]|
-                        [^a-zA-Z]UPDATE[^a-zA-Z]|
-                        [^a-zA-Z]TRUNCATE[^a-zA-Z])",
-                        this.sql,
-                        ,
-                        "ALL");
-                if (eval == 0) {
-                    result = stmt.execute(sql = qry).getResult();
-                } else {
-                    throw(type = "Invalid Statement", message = "Check your SQL statement for invalid characters");
-                }
+                qry = replaceNoCase(sql, ';', 'all');
+                qry = replaceNoCase(qry, 'ALTER', 'all');
+                qry = replaceNoCase(qry, 'DROP', 'all');
+                qry = replaceNoCase(qry, 'TRUNCATE', 'all');
+                result = stmt.execute(sql = qry).getResult();
             }
         } catch (any e) {
             savecontent variable="result" {
