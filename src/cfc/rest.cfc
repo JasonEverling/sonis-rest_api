@@ -1,6 +1,14 @@
-component putput="false" {
+/**
+* Sonis Restful API Endpoint
+*
+* @displayname Rest
+* @hint Run various API methods and functions
+* @author Jason A. Everling
+* @todo lots more custom functions to be added
+*/
+component output="false" {
 
-    remote function v1() {
+    remote function v1() output=false {
         try {
             //include "common/rest/header.cfm"; // Not used in prod
             // Setup the request
