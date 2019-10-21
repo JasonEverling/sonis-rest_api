@@ -86,7 +86,7 @@ component output="false"
                 error_type = rtrim(e.type);
                 error_msg = rtrim(e.message);
                 error_detail = rtrim(e.detail);
-                msg = '{"Error Type": #error_type#, "Error Message": #error_msg#, "Error Detail": #error_detail#}';
+                msg = '{"Error Type": "' & error_type & '", "Error Message": "' & error_msg & '", "Error Detail": "' & error_detail & '"}';
                 writeOutput(msg);
             }
         }

@@ -42,9 +42,10 @@ component output="false" {
                 variables.apiData = deserializeJSON(ToString(apiJSON));
                 // Build local variables from JSON data
                 for (key in apiData) {
-                    "#key#" = "#apiData[key]#";
+                    setVariable(key, apiData[key]);
                 }
             }
+            variables.meth = method;
             variables.contentType = "application/json;charset=UTF-8";
             if (!isDefined('session.retries')) {
                 session.retries = 0;
@@ -78,7 +79,7 @@ component output="false" {
                 // We got a authorization, hooray, let's return some data
                 session.retries = 0;
                 if (!builtin) {
-                    cfinvoke(component = "CFC.rest.#object#", method = "#method#", returnvariable = "result") {
+                    cfinvoke(component = "CFC.rest." &  object, method =  variables.meth, returnvariable = "result") {
                         if (variables.action == 'GET') {
                             for (i in variables.argumentdata) {
                                 cfinvokeargument(name = i, value = argumentdata[i]);
@@ -91,7 +92,7 @@ component output="false" {
                         }
                     };
                 } else {
-                    cfinvoke(component = "CFC.#object#", method = "#method#", returnvariable = "result") {
+                    cfinvoke(component = "CFC." &  object, method =  variables.meth, returnvariable = "result") {
                         cfinvokeargument(name = sonis_ds, value = sonis.ds);
                         cfinvokeargument(name = MainDir, value = MainDir);
                         if (variables.action == 'GET') {
@@ -115,7 +116,7 @@ component output="false" {
                 error_type = rtrim(e.type);
                 error_msg = rtrim(e.message);
                 error_detail = rtrim(e.detail);
-                msg = '{"Error Type": #error_type#, "Error Message": #error_msg#, "Error Detail": #error_detail#}';
+                msg = '{"Error Type": "' & error_type & '", "Error Message": "' & error_msg & '", "Error Detail": "' & error_detail & '"}';
                 writeOutput(msg);
             }
         }

@@ -48,7 +48,7 @@ component output="false"
         if (!isDefined('session.expires')) {
             result = DateAdd("s", length, Now());
         } else {
-            if (#session.expires# < Now()) {
+            if (session.expires < Now()) {
                 structClear(session);
             }
             result = DateAdd("s", length, Now());
