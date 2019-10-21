@@ -1,4 +1,11 @@
-component displayname="query" author="Jason Everling" hint="Custom data requests using sql statements" output="false"
+/**
+* SQL Statement Utility
+*
+* @displayname Stmt
+* @hint Custom data requests using sql statements
+* @author Jason A. Everling
+*/
+component output="false"
 {
 
     /**

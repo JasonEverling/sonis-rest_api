@@ -1,4 +1,11 @@
-component displayname="validate" author="Jason Everling" hint="Utility Functions around validation" output="false"
+/**
+* Utility Functions around validation
+*
+* @displayname Validate
+* @hint Various validation utilities that can be reused in various functions
+* @author Jason A. Everling
+*/
+component output="false"
 {
 
     utils = CreateObject("component", "utils");

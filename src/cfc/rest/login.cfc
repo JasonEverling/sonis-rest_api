@@ -1,4 +1,11 @@
-component displayname="login" author="Jason Everling" hint="Functions related to authentication" output="false"
+/**
+* Authentication Functions
+*
+* @displayname Login
+* @hint Functions related to authentication
+* @author Jason A. Everling
+*/
+component output="false"
 {
 
     db = CreateObject("component", "database");

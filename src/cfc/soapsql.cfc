@@ -1,4 +1,13 @@
-component displayname="soapsql" author="Jason Everling" hint="Sonis SOAP SQL Endpoint" output="false"
+/**
+* Sonis SOAP SQL Endpoint
+*
+* @displayname SoapSQL
+* @hint Run sql statements over the SOAP endpoint
+* @wsVersion 1
+* @author Jason A. Everling
+* @todo Cleanup, deduplication. Update to support version 2 of axis.
+*/
+component output="false"
 {
 
     this.utils = CreateObject("component", "CFC.rest.utils");

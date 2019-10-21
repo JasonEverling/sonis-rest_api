@@ -1,4 +1,13 @@
-component displayname="soapapi" author="Jason Everling" hint="Sonis SOAP API Endpoint" output="false"
+/**
+* Sonis SOAP API Endpoint
+*
+* @displayname SoapAPI
+* @hint Run various API methods and functions
+* @wsVersion 1
+* @author Jason A. Everling
+* @todo Create better injection detection so were not relying on the client. Update to support version 2 of axis.
+*/
+component output="false"
 {
 
     this.utils = CreateObject("component", "CFC.rest.utils");
@@ -6,7 +15,7 @@ component displayname="soapapi" author="Jason Everling" hint="Sonis SOAP API End
     this.objValid = CreateObject("component", "CFC.rest.validate");
 
     /**
-    * Sonis SOAP API Endpoint
+    * The SOAP API runner, call doAPISomething
     *
     * @author Jason A. Everling
     * @user api username
@@ -15,8 +24,8 @@ component displayname="soapapi" author="Jason Everling" hint="Sonis SOAP API End
     * @meth the method within the component
     * @hasReturnVariable either "yes" or "no" if returns
     * @argumentdata a simple array of arrays containing data for the method, i.e [["soc_sec","1234567"],["preferred","true"]]
-    * @todo Create better error handling results, cleanup
     * @return array|mixed the results returned from the method
+    * @todo Create better error handling results, cleanup
     */
     remote any function doAPISomething(required string user="", required string pass="", required string comp="", required string meth="", string hasReturnVariable="yes", required array argumentdata="") output=false {
 
@@ -77,7 +86,8 @@ component displayname="soapapi" author="Jason Everling" hint="Sonis SOAP API End
                 error_type = rtrim(e.type);
                 error_msg = rtrim(e.message);
                 error_detail = rtrim(e.detail);
-                writeOutput("Error Type: " & error_type & Chr(10) & "Error Message: " & error_msg & Chr(10) & "Error Detail: " & error_detail);
+                msg = '{"Error Type": #error_type#, "Error Message": #error_msg#, "Error Detail": #error_detail#}';
+                writeOutput(msg);
             }
         }
         return result;

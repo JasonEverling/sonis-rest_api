@@ -1,4 +1,11 @@
-component displayname="people" author="Jason Everling" hint="Functions related multiple persons" extends="person" output="false"
+/**
+* Grouped People Functions
+*
+* @displayname People
+* @hint Functions related multiple persons
+* @author Jason A. Everling
+*/
+component extends="person" output="false"
 {
 
     db = createObject("component", "database");

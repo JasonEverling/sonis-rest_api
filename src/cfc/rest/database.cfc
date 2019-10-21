@@ -1,4 +1,12 @@
-component displayname="database" author="Jason Everling" hint="A database utility" output="false"
+/**
+* A Database utility to execute sql statements
+*
+* @displayname Database
+* @hint Run sql statements
+* @author Jason A. Everling
+* @todo Create better injection detection so were not relying on the client.
+*/
+component output="false"
 {
 
     public function execQuery(required string stmt, required array params = [])
