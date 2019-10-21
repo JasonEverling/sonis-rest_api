@@ -20,10 +20,10 @@ component output="false"
         stmt = new query();
         stmt.setDatasource("#session.dsname#");
         stmt.SetName("stmt");
-        qry = replaceNoCase(sql, ';','all');
-        qry = replaceNoCase(qry, 'ALTER','all');
-        qry = replaceNoCase(qry, 'DROP','all');
-        qry = replaceNoCase(qry, 'TRUNCATE','all');
+        qry = replaceNoCase(sql, ';', '', 'all');
+        qry = replaceNoCase(qry, 'ALTER', '', 'all');
+        qry = replaceNoCase(qry, 'DROP', '', 'all');
+        qry = replaceNoCase(qry, 'TRUNCATE', '', 'all');
         result = stmt.execute(sql = qry).getResult();
         return result;
     }
