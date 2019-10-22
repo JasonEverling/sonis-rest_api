@@ -31,7 +31,7 @@ curl -X POST https://sonis.example.com/cfc/restapi.cfc?method=v1 \
     -H "Content-Type: application/json" \
     -H "X-SONIS-USER: your api username" \
     -H "X-SONIS-PWD: your api users password" \
-    -d '{"object": "person","action": "getDetails","returns": true,"builtin": false,"argumentdata": {"user": "000000000","type": "soc_sec"}}'
+    -d '{"object": "person","action": "getPersonAttributes","returns": true,"builtin": false,"argumentdata": {"user": "000000000","type": "soc_sec"}}'
 ````
 
 Example using builtin component/method 
