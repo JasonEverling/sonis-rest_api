@@ -18,7 +18,7 @@ component output="false"
     */
     public function run(required string sql) {
         stmt = new query();
-        stmt.setDatasource("#session.dsname#");
+        stmt.setDatasource(session.dsname);
         stmt.SetName("stmt");
         qry = replaceNoCase(sql, ';', '', 'all');
         qry = replaceNoCase(qry, 'ALTER', '', 'all');

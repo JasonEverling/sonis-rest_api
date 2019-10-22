@@ -8,16 +8,18 @@
 */
 component output="false" {
 
+    this.utils = CreateObject("component", "CFC.rest.utils");
+    this.objLogin = CreateObject("component", "CFC.rest.login");
+    this.objValid = CreateObject("component", "CFC.rest.validate");
+
     remote function v1() output=false {
         try {
             //include "common/rest/header.cfm"; // Not used in prod
             // Setup the request
             include "../application.cfm";
             cfheader(name = "Content-Type", value = "application/json;charset=UTF-8");
-            objValid = CreateObject("component", "CFC.rest.validate");
-            utils = CreateObject("component", "CFC.rest.utils");
-            sessionLength = objValid.validateSession();
-            hasHeaders = objValid.validateHeaders();
+            this.objValid.validateSession();
+            hasHeaders = this.objValid.validateHeaders();
             if (!isBoolean(hasHeaders)) {
                 return hasHeaders;
                 exit;
@@ -28,21 +30,21 @@ component output="false" {
             session.apiUser = lCase(getHttpRequestData().headers["X-SONIS-USER"]);
             variables.apiToken = getHttpRequestData().headers["X-SONIS-PWD"];
             variables.output = "";
-            variables.action = "";
+            variables.verb = "";
             if (getHTTPRequestData().method == 'GET') {
-                variables.action = "GET";
+                variables.verb = "GET";
                 variables.object = url.object;
                 variables.method = url.method;
                 variables.builtin = url.builtin;
-                variables.argumentdata = utils.listToStruct(url.argumentdata);
+                variables.argumentdata = this.utils.listToStruct(url.argumentdata);
             }
             if (getHTTPRequestData().method == 'POST') {
-                variables.action = "POST";
+                variables.verb = "POST";
                 variables.apiJSON = getHTTPRequestData().content;
                 variables.apiData = deserializeJSON(ToString(apiJSON));
                 // Build local variables from JSON data
                 for (key in apiData) {
-                    "#key#" = "#apiData[key]#";
+                    setVariable(key, apiData[key]);
                 }
             }
             variables.contentType = "application/json;charset=UTF-8";
@@ -54,52 +56,51 @@ component output="false" {
                 variables.builtin = false;
             }
             // Begin authorization sequence
-            objLogin = CreateObject("component", "CFC.rest.login");
-            isAuthenticated = objLogin.apiAuthorization(variables.apiToken);
+            isAuthenticated = this.objLogin.apiAuthorization(variables.apiToken);
             // Throttle login attempts
             if (session.retries >= webopt.login_retries) {
-                locked = objLogin.disableLogin(session.apiUser);
+                locked = this.objLogin.disableLogin(session.apiUser);
                 if (!locked) {
-                    msg = utils.createHttpMsg(417, "Expectation Failed", "Please contact the site administrator");
+                    msg = this.utils.createHttpMsg(417, "Expectation Failed", "Please contact the site administrator");
                     writeOutput(msg);
                     exit;
                 }
             }
             // Check if disabled or locked
-            isDisabled = objLogin.verifyCredentials(session.apiUser, variables.apiToken, '', 'security');
+            isDisabled = this.objLogin.verifyCredentials(session.apiUser, variables.apiToken, '', 'security');
             if (isDisabled) {
-                variables.result = utils.createHttpMsg(401, "Account Disabled");
+                variables.result = this.utils.createHttpMsg(401, "Account Disabled");
             } else if (!isAuthenticated) {
                 if (isDefined('session.retries') && session.retries >= 0) {
                     session.retries = session.retries + 1;
                 }
-                variables.result = utils.createHttpMsg(401, "Unauthorized");
+                variables.result = this.utils.createHttpMsg(401, "Unauthorized");
             } else {
                 // We got a authorization, hooray, let's return some data
                 session.retries = 0;
                 if (!builtin) {
-                    cfinvoke(component = "CFC.rest.#object#", method = "#method#", returnvariable = "result") {
-                        if (variables.action == 'GET') {
+                    cfinvoke(component = "CFC.rest." &  object, method =  action, returnvariable = "result") {
+                        if (variables.verb == 'GET') {
                             for (i in variables.argumentdata) {
                                 cfinvokeargument(name = i, value = argumentdata[i]);
                             }
                         }
-                        if (variables.action == 'POST') {
+                        if (variables.verb == 'POST') {
                             for (i in apiData.argumentdata) {
                                 cfinvokeargument(name = i, value = apiData.argumentdata[i]);
                             }
                         }
                     };
                 } else {
-                    cfinvoke(component = "CFC.#object#", method = "#method#", returnvariable = "result") {
+                    cfinvoke(component = "CFC." &  object, method =  action, returnvariable = "result") {
                         cfinvokeargument(name = sonis_ds, value = sonis.ds);
                         cfinvokeargument(name = MainDir, value = MainDir);
-                        if (variables.action == 'GET') {
+                        if (variables.verb == 'GET') {
                             for (i in variables.argumentdata) {
                                 cfinvokeargument(name = i, value = argumentdata[i]);
                             }
                         }
-                        if (variables.action == 'POST') {
+                        if (variables.verb == 'POST') {
                             for (i in apiData.argumentdata) {
                                 cfinvokeargument(name = i, value = apiData.argumentdata[i]);
                             }
@@ -115,7 +116,7 @@ component output="false" {
                 error_type = rtrim(e.type);
                 error_msg = rtrim(e.message);
                 error_detail = rtrim(e.detail);
-                msg = '{"Error Type": #error_type#, "Error Message": #error_msg#, "Error Detail": #error_detail#}';
+                msg = '{"Error Type": "' & error_type & '", "Error Message": "' & error_msg & '", "Error Detail": "' & error_detail & '"}';
                 writeOutput(msg);
             }
         }

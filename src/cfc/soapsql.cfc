@@ -81,7 +81,7 @@ component output="false"
                     error_sql = "";
                     error_query = "";
                 }
-                msg = '{"Error Type": "#error_type#", "Error Message": "#error_msg#", "Error Detail": "#error_detail#", "Error Code": "#error_code#", "Error State": "#error_state#", "Error SQL": "#error_sql#", "Error Query": "#error_query#"}';
+                msg = '{"Error Type": ' & error_type & '", "Error Message": ' & error_msg &'", "Error Detail": "' & error_detail & '", "Error Code": "' & error_code & '", "Error State": "' & error_state & '", "Error SQL": "' & error_sql & '", "Error Query": "' & error_query & '"}';
                 writeOutput(msg);
             }
         }

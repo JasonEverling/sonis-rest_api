@@ -20,9 +20,9 @@ component output="false"
     public function createHttpMsg(required numeric code, required string details, string extended = "")
     {
         if (extended == '') {
-            result = '{"Return Code": #code#, "Details": "#details#"}';
+            result = '{"Return Code": "' & code & '", "Details": "' & details & '"}';
         } else {
-            result = '{"Return Code": #code#, "Details": "#details#", "Extended": "#extended#"}';
+            result = '{"Return Code": "' & code & '", "Details": "' & details & '", "Extended": "' & extended & '"}';
         }
         return result;
     }
@@ -41,7 +41,7 @@ component output="false"
             result = '{"Return Code": 401, "Details": "Invalid Lastname", "Extended": "A lastname is required"}';
         }
         sql = new query();
-        sql.setDatasource("#session.dsname#");
+        sql.setDatasource(session.dsname);
         sql.SetName("sql");
         ln = left(ucase(lastname),2);
         matched = true;
