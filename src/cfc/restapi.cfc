@@ -34,7 +34,7 @@ component output="false" {
             if (getHTTPRequestData().method == 'GET') {
                 variables.verb = "GET";
                 variables.object = url.object;
-                variables.method = url.method;
+                variables.action = url.action;
                 variables.builtin = url.builtin;
                 variables.argumentdata = this.utils.listToStruct(url.argumentdata);
             }
