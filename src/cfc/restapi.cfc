@@ -30,16 +30,16 @@ component output="false" {
             session.apiUser = lCase(getHttpRequestData().headers["X-SONIS-USER"]);
             variables.apiToken = getHttpRequestData().headers["X-SONIS-PWD"];
             variables.output = "";
-            variables.action = "";
+            variables.verb = "";
             if (getHTTPRequestData().method == 'GET') {
-                variables.action = "GET";
+                variables.verb = "GET";
                 variables.object = url.object;
                 variables.method = url.method;
                 variables.builtin = url.builtin;
                 variables.argumentdata = this.utils.listToStruct(url.argumentdata);
             }
             if (getHTTPRequestData().method == 'POST') {
-                variables.action = "POST";
+                variables.verb = "POST";
                 variables.apiJSON = getHTTPRequestData().content;
                 variables.apiData = deserializeJSON(ToString(apiJSON));
                 // Build local variables from JSON data
@@ -47,7 +47,6 @@ component output="false" {
                     setVariable(key, apiData[key]);
                 }
             }
-            variables.meth = method;
             variables.contentType = "application/json;charset=UTF-8";
             if (!isDefined('session.retries')) {
                 session.retries = 0;
@@ -80,28 +79,28 @@ component output="false" {
                 // We got a authorization, hooray, let's return some data
                 session.retries = 0;
                 if (!builtin) {
-                    cfinvoke(component = "CFC.rest." &  object, method =  variables.meth, returnvariable = "result") {
-                        if (variables.action == 'GET') {
+                    cfinvoke(component = "CFC.rest." &  object, method =  action, returnvariable = "result") {
+                        if (variables.verb == 'GET') {
                             for (i in variables.argumentdata) {
                                 cfinvokeargument(name = i, value = argumentdata[i]);
                             }
                         }
-                        if (variables.action == 'POST') {
+                        if (variables.verb == 'POST') {
                             for (i in apiData.argumentdata) {
                                 cfinvokeargument(name = i, value = apiData.argumentdata[i]);
                             }
                         }
                     };
                 } else {
-                    cfinvoke(component = "CFC." &  object, method =  variables.meth, returnvariable = "result") {
+                    cfinvoke(component = "CFC." &  object, method =  action, returnvariable = "result") {
                         cfinvokeargument(name = sonis_ds, value = sonis.ds);
                         cfinvokeargument(name = MainDir, value = MainDir);
-                        if (variables.action == 'GET') {
+                        if (variables.verb == 'GET') {
                             for (i in variables.argumentdata) {
                                 cfinvokeargument(name = i, value = argumentdata[i]);
                             }
                         }
-                        if (variables.action == 'POST') {
+                        if (variables.verb == 'POST') {
                             for (i in apiData.argumentdata) {
                                 cfinvokeargument(name = i, value = apiData.argumentdata[i]);
                             }
