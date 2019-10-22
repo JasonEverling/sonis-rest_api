@@ -1,0 +1,452 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>utils</title>
+	<meta name="keywords" content="api.rest.concurrent.Callable interface">
+	<!-- common assets -->
+	
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel ="stylesheet" type="text/css" href="../../bootstrap/css/bootstrap.min.css">
+<link rel ="stylesheet" type="text/css" href="../../stylesheet.css">
+	
+<link href='https://fonts.googleapis.com/css?family=Ubuntu:400,300,300italic,400italic,700,700italic|Ubuntu+Mono' rel='stylesheet' type='text/css' />
+	
+<script src="../../bootstrap/js/jquery-2.1.0.min.js" type="text/javascript"></script>
+<script src="../../bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
+
+<script>
+$(document).ready(function() {
+	// Global Tool Tip Settings
+	$( '[title]' ).tooltip({
+		 animation: 'slide',
+		 delay: { show: 250, hide: 250 }
+	});
+});
+</script>
+	<!-- syntax highlighter -->
+	<link type="text/css" rel="stylesheet" href="../../highlighter/styles/shCoreDefault.css">
+	<script src="../../highlighter/scripts/shCore.js"></script>
+	<script src="../../highlighter/scripts/shBrushColdFusion.js"></script>
+	<script src="../../highlighter/scripts/shBrushXml.js"></script>
+	<script src="../../highlighter/scripts/shBrushSql.js"></script>
+	<script src="../../highlighter/scripts/shBrushJScript.js"></script>
+	<script src="../../highlighter/scripts/shBrushJava.js"></script>
+	<script src="../../highlighter/scripts/shBrushCss.js"></script>
+	<script type="text/javascript">SyntaxHighlighter.all();</script>
+</head>
+
+<body class="withNavbar">
+
+
+
+<!-- ========= START OF NAVBAR ======= -->
+<a name="navbar_top"></a>
+<a href="#skip-navbar_top" title="skip navigation links"></a>	
+
+<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+	<div class="container-fluid">
+    
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#class-navigation">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" href="#"><strong>Sonis API Documentation</strong></a>
+		</div>
+
+	    <div class="collapse navbar-collapse" id="class-navigation">
+	    	<ul class="nav navbar-nav">
+				
+					<li><a href="../../overview-summary.html"><i class="glyphicon glyphicon-plane"></i> overview</a></li>
+					
+					<li><a href="package-summary.html"><i class="glyphicon glyphicon-folder-open"></i> &nbsp;package</a></li>
+				
+					<li class="dropdown active">
+						<a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="glyphicon glyphicon-file"></i> class <b class="caret"></b></a>
+
+						<ul class="dropdown-menu">
+							<li><a href="#class">Class Definition</a></li>
+							<li><a href="#constructor_summary">Constructor Summary</a></li>
+							<li><a href="#constructor_detail">Constructor Detail</a></li>
+							<li><a href="#inherited_methods">Inherited Methods</a></li>
+							<li><a href="#method_summary">Method Summary</a></li>
+							<li><a href="#method_detail">Method Detail</a></li>
+							<li><a href="#property_summary">Property Summary</a></li>
+							<li><a href="#property_detail">Property Detail</a></li>
+							
+						</ul>
+					</li>
+				
+	      	</ul>
+
+			<ul class="nav navbar-nav navbar-right">
+				<li><a href="../../index.html?api/rest/utils.html" target="_top">
+					<i class="glyphicon glyphicon-fullscreen"></i> Frames
+					</a>
+				</li>
+			</ul>
+	    </div>
+
+	</div>
+</nav>	
+
+<a name="skip-navbar_top"></a>
+<!-- ========= END OF NAVBAR ========= -->
+
+<!-- ======== start of class data ======== -->
+<a name="class"><!-- --></a>
+
+<!-- Package -->
+<div class="pull-right">
+	<a href="package-summary.html" title="Package: api.rest"><span class="label label-success">api.rest</span></a>
+</div>
+
+<h2>
+
+Class
+utils</h2>
+
+
+
+<!-- Inheritance Tree-->
+<pre style="background:white">WEB-INF.cftags.component
+    <img src="../../resources/inherit.gif" alt="extended by ">docbox.api.rest.utils
+</pre>
+
+
+
+<div id="class-hint">
+	<p>Utility Functions for API processing</p>
+</div>
+
+
+<!-- Clas Attributes -->
+<div class="panel panel-info">
+	<div class="panel-heading"><strong>Class Attributes:</strong></div>
+		<div class="panel-body">
+		
+			<li class="label label-danger label-annotations">
+				displayname 
+				: utils 
+			</li>
+			&nbsp;
+			
+			<li class="label label-danger label-annotations">
+				output 
+				: false 
+			</li>
+			&nbsp;
+			
+			<li class="label label-danger label-annotations">
+				author 
+				: Jason Everling 
+			</li>
+			&nbsp;
+			
+	</div>
+</div>
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+
+<a name="method_summary"><!-- --></a>
+<table class="table table-bordered table-hover">
+	<tr class="info">
+		<th align="left" colspan="2">
+			<strong>Method Summary</strong>
+		</th>
+	</tr>
+
+	
+	<tr>
+		<td align="right" valign="top" width="1%">
+			<code>any</code>
+		</td>
+		<td>
+			<strong><a href="utils.html#createHttpMsg()">createHttpMsg</A></strong>(numeric code, string details, [string extended=''])
+			<br>
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Returns an http error code message in JSON format.
+			
+		</td>
+	</tr>
+	
+	<tr>
+		<td align="right" valign="top" width="1%">
+			<code>any</code>
+		</td>
+		<td>
+			<strong><a href="utils.html#generateID()">generateID</A></strong>(string lastname)
+			<br>
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Generates a new Sonis ID.
+			
+		</td>
+	</tr>
+	
+	<tr>
+		<td align="right" valign="top" width="1%">
+			<code>any</code>
+		</td>
+		<td>
+			<strong><a href="utils.html#generateRID()">generateRID</A></strong>(string suffix)
+			<br>
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Generates a random _rid for use in tables.
+			
+		</td>
+	</tr>
+	
+	<tr>
+		<td align="right" valign="top" width="1%">
+			<code>any</code>
+		</td>
+		<td>
+			<strong><a href="utils.html#generateUUID()">generateUUID</A></strong>(string format)
+			<br>
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Generates a random uuid value.
+			
+		</td>
+	</tr>
+	
+	<tr>
+		<td align="right" valign="top" width="1%">
+			<code>any</code>
+		</td>
+		<td>
+			<strong><a href="utils.html#isValidAttribute()">isValidAttribute</A></strong>(string attribute, string table)
+			<br>
+			
+		</td>
+	</tr>
+	
+	<tr>
+		<td align="right" valign="top" width="1%">
+			<code>any</code>
+		</td>
+		<td>
+			<strong><a href="utils.html#listToStruct()">listToStruct</A></strong>(string list)
+			<br>
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Converts a list to struct, a sister to listToArray.
+			
+		</td>
+	</tr>
+	
+</table>
+
+
+
+<a name="inherited_methods"><!-- --></a>
+
+
+	&nbsp;
+	<a name="methods_inherited_from_class_WEB-INF.cftags.component"><!-- --></a>
+	<table class="table table-hover table-bordered">
+		<tr class="info">
+			<th align="left">
+				<strong>Methods inherited from class <kbd>WEB-INF.cftags.component</kbd></strong>
+			</th>
+		</tr>
+		<tr>
+			<td>
+				
+					<span class="label label-warning"><em>None</em></span>
+				
+			</td>
+		</tr>
+	</table>
+
+
+<hr>
+
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+
+
+<!-- ============ PROPERTY DETAIL ========== -->
+
+
+<!-- ============ METHOD DETAIL ========== -->
+
+<a name="method_detail"><!-- --></a>
+<table class="table table-bordered">
+	<tr class="info">
+		<th colspan="1" align="left">
+			<strong>Method Detail</strong>
+		</th>
+	</tr>
+</table>
+
+
+	<a name="createHttpMsg()"><!-- --></a>
+	<h3>
+		createHttpMsg 
+	</h3>
+
+	<kbd>public any <strong>createHttpMsg</strong>(numeric code, string details, [string extended=''])</kbd>
+
+	<br><br>
+
+	
+		<p>Returns an http error code message in JSON format</p>
+	
+		<dl>
+		<dt><strong>Parameters:</strong></dt>
+		
+		<dd><code>code</code> - the error code</dd>
+		
+		<dd><code>details</code> - the The message detail</dd>
+		
+		<dd><code>extended</code> - more information regarding the error</dd>
+		
+		</dl>
+	
+		<dl>
+			<dt><strong>Returns:</strong></dt>
+			<dd>numeric the generated number</dd>
+		</dl>
+	
+
+	</dl>
+	<hr>
+
+	<a name="generateID()"><!-- --></a>
+	<h3>
+		generateID 
+	</h3>
+
+	<kbd>public any <strong>generateID</strong>(string lastname)</kbd>
+
+	<br><br>
+
+	
+		<p>Generates a new Sonis ID</p>
+	
+		<dl>
+		<dt><strong>Parameters:</strong></dt>
+		
+		<dd><code>lastname</code> - the persons last name</dd>
+		
+		</dl>
+	
+		<dl>
+			<dt><strong>Returns:</strong></dt>
+			<dd>numeric the generated number</dd>
+		</dl>
+	
+
+	</dl>
+	<hr>
+
+	<a name="generateRID()"><!-- --></a>
+	<h3>
+		generateRID 
+	</h3>
+
+	<kbd>public any <strong>generateRID</strong>(string suffix)</kbd>
+
+	<br><br>
+
+	
+		<p>Generates a random _rid for use in tables</p>
+	
+		<dl>
+		<dt><strong>Parameters:</strong></dt>
+		
+		<dd><code>suffix</code> - Either a 0 or 1 suffixed to number to match Sonis rid's</dd>
+		
+		</dl>
+	
+		<dl>
+			<dt><strong>Returns:</strong></dt>
+			<dd>numeric the generated number</dd>
+		</dl>
+	
+
+	</dl>
+	<hr>
+
+	<a name="generateUUID()"><!-- --></a>
+	<h3>
+		generateUUID 
+	</h3>
+
+	<kbd>public any <strong>generateUUID</strong>(string format)</kbd>
+
+	<br><br>
+
+	
+		<p>Generates a random uuid value</p>
+	
+		<dl>
+		<dt><strong>Parameters:</strong></dt>
+		
+		<dd><code>format</code> - string either cf or guid format, defaults to cf</dd>
+		
+		</dl>
+	
+		<dl>
+			<dt><strong>Returns:</strong></dt>
+			<dd>numeric the generated number</dd>
+		</dl>
+	
+
+	</dl>
+	<hr>
+
+	<a name="isValidAttribute()"><!-- --></a>
+	<h3>
+		isValidAttribute 
+	</h3>
+
+	<kbd>public any <strong>isValidAttribute</strong>(string attribute, string table)</kbd>
+
+	<br><br>
+
+	
+		<dl>
+		<dt><strong>Parameters:</strong></dt>
+		
+		<dd><code>attribute</code></dd>
+		
+		<dd><code>table</code></dd>
+		
+		</dl>
+	
+
+	</dl>
+	<hr>
+
+	<a name="listToStruct()"><!-- --></a>
+	<h3>
+		listToStruct 
+	</h3>
+
+	<kbd>public any <strong>listToStruct</strong>(string list)</kbd>
+
+	<br><br>
+
+	
+		<p>Converts a list to struct, a sister to listToArray</p>
+	
+		<dl>
+		<dt><strong>Parameters:</strong></dt>
+		
+		<dd><code>list</code> - A list of key=value pairs separated by a semi-colon</dd>
+		
+		</dl>
+	
+		<dl>
+			<dt><strong>Returns:</strong></dt>
+			<dd>struct the generated struct</dd>
+		</dl>
+	
+
+	</dl>
+	<hr>
+
+
+
+</body>
+</html>
