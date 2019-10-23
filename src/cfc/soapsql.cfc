@@ -67,20 +67,13 @@ component output="false"
             }
         } catch (any e) {
             savecontent variable="result" {
-                error_type = rtrim(e.type);
-                error_msg = rtrim(e.message);
-                error_detail = rtrim(e.detail);
-                if (compareNoCase(e.type,"database") == 0) {
-                    error_code = rtrim(e.nativeerrorcode);
-                    error_state = rtrim(e.sqlstate);
-                    error_sql = rtrim(e.sql);
-                    error_query = rtrim(e.queryerror);
-                } else {
-                    error_code = "";
-                    error_state = "";
-                    error_sql = "";
-                    error_query = "";
-                }
+                error_type = (rtrim(e.type)) ?: "";
+                error_msg = (rtrim(e.message)) ?: "";
+                error_detail = (rtrim(e.detail)) ?: "";
+                error_code = (rtrim(e.nativeerrorcode)) ?: "";
+                error_state = (rtrim(e.sqlstate)) ?: "";
+                error_sql = (rtrim(e.sql)) ?: "";
+                error_query = (rtrim(e.queryerror)) ?: "";
                 msg = '{"Error Type": ' & error_type & '", "Error Message": ' & error_msg &'", "Error Detail": "' & error_detail & '", "Error Code": "' & error_code & '", "Error State": "' & error_state & '", "Error SQL": "' & error_sql & '", "Error Query": "' & error_query & '"}';
                 writeOutput(msg);
             }

@@ -26,7 +26,7 @@ component output="false" {
             }
             // Setup vars
             session.dsname = sonis.ds;
-            session.wwwroot = ExpandPath("./");
+            session.wwwroot = ExpandPath("../");
             session.apiUser = lCase(getHttpRequestData().headers["X-SONIS-USER"]);
             variables.apiToken = getHttpRequestData().headers["X-SONIS-PWD"];
             variables.output = "";

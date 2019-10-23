@@ -72,10 +72,10 @@ component output="false"
                         }
                     }
                 }
-                if (this.returns == 'no') {
+                if (this.returns == '0' || this.returns == 'no') {
                     // Cleanup whitespaces, line feeds and carriage returns
                     return REReplace(this.apiData, "[\s]+", "Chr(13)Chr(10)", "ALL");
-                } else if (this.returns == 'yes') {
+                } else if (this.returns == '1' || this.returns == 'yes') {
                     return getresults;
                 } else {
                     throw(type = "Invalid Parameter", message = "The hasReturnVariable parameter must be either yes or no");
@@ -83,9 +83,9 @@ component output="false"
             }
         } catch (any e) {
             savecontent variable="result" {
-                error_type = rtrim(e.type);
-                error_msg = rtrim(e.message);
-                error_detail = rtrim(e.detail);
+                error_type = (rtrim(e.type)) ?: "";
+                error_msg = (rtrim(e.message)) ?: "";
+                error_detail = (rtrim(e.detail)) ?: "";
                 msg = '{"Error Type": "' & error_type & '", "Error Message": "' & error_msg & '", "Error Detail": "' & error_detail & '"}';
                 writeOutput(msg);
             }
