@@ -10,9 +10,9 @@
 component output="false"
 {
 
-    this.utils = CreateObject("component", "CFC.rest.utils");
-    this.objLogin = CreateObject("component", "CFC.rest.login");
-    this.objValid = CreateObject("component", "CFC.rest.validate");
+    // Set as global session vars since we dont have a modifiable application.cfc
+    session.objDB = CreateObject("component", "CFC.rest.database");
+    session.objUtils = CreateObject("component", "CFC.rest.utils");
 
     /**
     * Sonis SOAP SQL runner
@@ -25,16 +25,19 @@ component output="false"
     * @return array|mixed the sql results
     */
     remote any function doSQLSomething(required string user="", required string pass="", required string sql="") output=false {
+
+        this.objValid = CreateObject("component", "CFC.rest.validate");
+        this.objLogin = CreateObject("component", "CFC.rest.login");
+
         try {
             include "../application.cfm";
-            this.objValid.validateSession();
+            this.objValid.validateSession(); // Validate api session, shorter than app defined
             session.dsname = sonis.ds;
+            session.wwwroot = ExpandPath("../");
             session.apiUser = lCase(user);
+            session.retries = (session.retries) ?: 0;
             this.apiToken = pass;
             this.sql = sql;
-            if (!isDefined('session.retries')) {
-                session.retries = 0;
-            }
 
             // Begin authorization sequence
             isAuthenticated = this.objLogin.apiAuthorization(this.apiToken);

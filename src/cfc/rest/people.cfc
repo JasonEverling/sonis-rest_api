@@ -8,9 +8,6 @@
 component extends="person" output="false"
 {
 
-    db = createObject("component", "database");
-    utils = CreateObject("component", "utils");
-
     /**
      * Same as person.getAttributes but instead for a group of people
      *
@@ -65,7 +62,7 @@ component extends="person" output="false"
                         LEFT JOIN division d ON n.div_cod = d.div_cod
                         LEFT JOIN dept ON n.dept_cod = dept.dept_cod
                         LEFT JOIN level_ l ON n.level_ = l.level_ " & where;
-        result = db.execQuery(stmt, params);
+        result = session.objDB.execQuery(stmt, params);
         return result;
     }
 }

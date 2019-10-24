@@ -130,9 +130,8 @@ component output="false"
 
     public function isValidAttribute(required string attribute, required string table)
     {
-        db = CreateObject("component", "database");
         validColumn = false;
-        qry = db.execQuery("SELECT TOP 1 * FROM " & table);
+        qry = session.objDB.execQuery("SELECT TOP 1 * FROM " & table);
         columnNames = qry.ColumnList;
         validColumn = listFind(columnNames, uCase(attribute));
         if (validColumn > 0) {

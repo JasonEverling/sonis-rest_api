@@ -8,9 +8,6 @@
 component output="false"
 {
 
-    db = CreateObject("component", "database");
-    utils = CreateObject("component", "utils");
-
     /**
     * Returns true or false if api token is valid, follows api* pattern
     *
@@ -27,7 +24,7 @@ component output="false"
                 FROM security s
                 WHERE s.user_id = :user AND CONVERT(char, DECRYPTBYKEYAUTOCERT(CERT_ID('SSN'), NULL, s.password)) = :token AND s.disabled = '0'";
         params = [["user", session.apiUser],["token", token]];
-        result = db.execQuery(stmt, params);
+        result = session.objDB.execQuery(stmt, params);
         if (result.RecordCount > 0) {
             return true;
         }
@@ -47,7 +44,7 @@ component output="false"
         params = [["user", user]];
         stmt = "UPDATE security SET disabled = 1 WHERE user_id = :user";
         try {
-            db.execQuery(stmt, params);
+            session.objDB.execQuery(stmt, params);
         } catch (any e) {
             error = true;
         }
@@ -90,7 +87,7 @@ component output="false"
                     FROM security s
                     WHERE s.user_id = :user AND CONVERT(char, DECRYPTBYKEYAUTOCERT(CERT_ID('SSN'), NULL, s.password)) = :password AND s.disabled = '0'";
         }
-        result = db.execQuery(stmt, params);
+        result = session.objDB.execQuery(stmt, params);
         if (result.RecordCount > 0) {
             return true;
         }

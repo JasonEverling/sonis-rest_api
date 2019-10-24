@@ -10,9 +10,9 @@
 component output="false"
 {
 
-    this.utils = CreateObject("component", "CFC.rest.utils");
-    this.objLogin = CreateObject("component", "CFC.rest.login");
-    this.objValid = CreateObject("component", "CFC.rest.validate");
+    // Set as global session vars since we dont have a modifiable application.cfc
+    session.objDB = CreateObject("component", "CFC.rest.database");
+    session.objUtils = CreateObject("component", "CFC.rest.utils");
 
     /**
     * The SOAP API runner, call doAPISomething
@@ -29,17 +29,19 @@ component output="false"
     */
     remote any function doAPISomething(required string user="", required string pass="", required string comp="", required string meth="", string hasReturnVariable="yes", required array argumentdata="") output=false {
 
+        this.objValid = CreateObject("component", "CFC.rest.validate");
+        this.objLogin = CreateObject("component", "CFC.rest.login");
+
         try {
             include "../application.cfm";
             this.objValid.validateSession(); // Validate api session, shorter than app defined
             session.dsname = sonis.ds;
+            session.wwwroot = ExpandPath("../");
             session.apiUser = lCase(user);
+            session.retries = (session.retries) ?: 0;
             this.apiToken = pass;
             this.apiData = argumentdata;
             this.returns = lcase(hasReturnVariable);
-            if (!isDefined('session.retries')) {
-                session.retries = 0;
-            }
 
             // Begin authorization sequence
             isAuthenticated = this.objLogin.apiAuthorization(this.apiToken);
