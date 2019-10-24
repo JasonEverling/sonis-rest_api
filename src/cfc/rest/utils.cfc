@@ -128,16 +128,38 @@ component output="false"
         return result;
     }
 
+    /**
+    * Determines if the 'attribute' passed is a valid column name with the table
+    *
+    * @attribute the column name
+    * @table the table name to check
+    * @author Jason A. Everling
+    * @return boolean
+    */
     public function isValidAttribute(required string attribute, required string table)
     {
-        db = CreateObject("component", "database");
         validColumn = false;
-        qry = db.execQuery("SELECT TOP 1 * FROM " & table);
+        qry = session.objDB.execQuery("SELECT TOP 1 * FROM " & table);
         columnNames = qry.ColumnList;
         validColumn = listFind(columnNames, uCase(attribute));
         if (validColumn > 0) {
             return true;
         }
         return false;
+    }
+
+    /**
+    * Removes a specified 'amount' of characters from a strings end
+    *
+    * @value string to be cut
+    * @amount amount to be cut by starting from the right
+    * @author Jason A. Everling
+    * @return string the new value
+    */
+    public function cutString(required string value, required numeric amount)
+    {
+        value = rtrim(value);
+        result = left(value, len(value) - amount);
+        return result;
     }
 }

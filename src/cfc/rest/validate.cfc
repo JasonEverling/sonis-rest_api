@@ -8,8 +8,6 @@
 component output="false"
 {
 
-    utils = CreateObject("component", "utils");
-
     /**
     * Validates required headers are set
     *
@@ -20,13 +18,13 @@ component output="false"
     {
         if (!StructKeyExists(getHttpRequestData().headers, "X-SONIS-USER") || !isJSON(getHTTPRequestData().content) || !StructKeyExists(getHttpRequestData().headers, "X-SONIS-PWD")) {
             if (!StructKeyExists(getHttpRequestData().headers, "X-SONIS-USER")) {
-                result = utils.createHttpMsg(400, "Bad Request", "X-SONIS-USER Header is missing");
+                result = session.objUtils.createHttpMsg(400, "Bad Request", "X-SONIS-USER Header is missing");
             }
             if (!StructKeyExists(getHttpRequestData().headers, "X-SONIS-PWD")) {
-                result = utils.createHttpMsg(400, "Bad Request", "X-SONIS-PWD Header is missing");
+                result = session.objUtils.createHttpMsg(400, "Bad Request", "X-SONIS-PWD Header is missing");
             }
             if (!isJSON(getHTTPRequestData().content)) {
-                result = utils.createHttpMsg(400, "Bad Request", "Payload is not valid JSON");
+                result = session.objUtils.createHttpMsg(400, "Bad Request", "Payload is not valid JSON");
             }
             return result;
         } else {

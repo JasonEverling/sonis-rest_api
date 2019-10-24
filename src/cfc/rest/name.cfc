@@ -8,9 +8,6 @@
 component extends="person" output="false"
 {
 
-    db = CreateObject("component", "database");
-    utils = CreateObject("component", "utils");
-
     /**
     * Gets a persons name attribute
     *
@@ -29,17 +26,62 @@ component extends="person" output="false"
         } else if (type == "email") {
             where = "INNER JOIN address a ON name.soc_sec = a.soc_sec AND a.preferred = '1' WHERE a.email = :user";
         } else {
-            return utils.createHttpMsg(400, "Bad Request");
+            return session.objUtils.createHttpMsg(400, "Bad Request");
         }
-        if (utils.isValidAttribute(attribute, "name")) {
+        if (session.objUtils.isValidAttribute(attribute, "name")) {
             params = [["user", user],["attribute", attribute]];
             stmt = "OPEN SYMMETRIC KEY SSN_Key_01
                     DECRYPTION BY CERTIFICATE SSN
                     SELECT rtrim(" & attribute & ") as " & attribute & " " & "
                     FROM name " & where;
-            result = db.execQuery(stmt, params);
+            result = session.objDB.execQuery(stmt, params);
         } else {
-            result = utils.createHttpMsg(400, "Bad Request");
+            result = session.objUtils.createHttpMsg(400, "Bad Request");
+        }
+        return result;
+    }
+
+    /**
+    * Gets a persons name attributes
+    *
+    * @author Jason A. Everling
+    * @user Username
+    * @type Type of username, either soc_sec, ldap, or email
+    * @attributes a comma-seperated list of attributes to get, i.e "attributes": "first_name, last_name"
+    * @return string the value
+    */
+    public function getNameAttributes(required string user, required string type, required string attributes)
+    {
+        attributes = replaceNoCase(attributes, ', ',',', 'all');
+        attrArray = listToArray(attributes, ',');
+        if (type == "soc_sec") {
+            where = "WHERE soc_sec = :user";
+        } else if (type == "ldap") {
+            where = "WHERE ldap_id = :user";
+        } else if (type == "email") {
+            where = "INNER JOIN address a ON name.soc_sec = a.soc_sec AND a.preferred = '1' WHERE a.email = :user";
+        } else {
+            return session.objUtils.createHttpMsg(400, "Bad Request");
+        }
+        validColumns = [];
+        isValid = true;
+        for (attribute in attrArray) {
+            if (session.objUtils.isValidAttribute(attribute, "name")) {
+                arrayAppend(validColumns,attribute);
+            } else {
+                isValid = false;
+                break;
+            }
+        }
+        if (isValid) {
+            params = [["user", user]];
+            stmt = "OPEN SYMMETRIC KEY SSN_Key_01
+                    DECRYPTION BY CERTIFICATE SSN
+                    SELECT " & arrayToList(validColumns) & " " & "
+                    FROM name " & where;
+            result = session.objDB.execQuery(stmt, params);
+        } else {
+            result = session.objUtils.createHttpMsg(400, "Invalid attribute specified");
         }
         return result;
     }
@@ -63,20 +105,71 @@ component extends="person" output="false"
         } else if (type == "email") {
             where = "FROM name n INNER JOIN address a ON n.soc_sec = a.soc_sec AND a.preferred = '1' WHERE a.email = :user";
         } else {
-            return utils.createHttpMsg(400, "Bad Request");
+            return session.objUtils.createHttpMsg(400, "Bad Request");
         }
-        if (utils.isValidAttribute(attribute, "name")) {
+        if (session.objUtils.isValidAttribute(attribute, "name")) {
             params = [["user", user],["attribute", attribute],["newvalue", newvalue]];
             stmt = "UPDATE name
                     SET " & attribute & " = :newvalue " & where & " SELECT @@RowCount AS affected";
-            result = db.execQuery(stmt, params);
+            result = session.objDB.execQuery(stmt, params);
             if (result.affected > 0) {
-                return utils.createHttpMsg(202, "Accepted");
+                return session.objUtils.createHttpMsg(202, "Accepted");
             }
-            return utils.createHttpMsg(204, "No Change");
+            return session.objUtils.createHttpMsg(204, "No Change");
         } else {
-            return utils.createHttpMsg(400, "Bad Request");
+            return session.objUtils.createHttpMsg(400, "Bad Request");
         }
+    }
+
+    /**
+    * Update a list of attributes for the given person
+    *
+    * @author Jason A. Everling
+    * @user Username
+    * @type Type of username, either soc_sec, ldap, or email
+    * @attributes a json array (with the value of 'attributes') of arrays in attribute: value format, i.e {"attributes": {"first_name": "John", "last_name": "Doe"}}
+    * @return string the value
+    */
+    public function updateNameAttributes(required string user, required string type, required any attributes)
+    {
+        keys = '';
+        params = [["user", user]];
+        isValid = true;
+        if (isJSON(attributes)) {
+            jsonData = deserializeJSON(ToString(attributes));
+        } else {
+            return session.objUtils.createHttpMsg(400, "Bad Request", "A valid JSON array is required, i.e {'attributes': {'first_name': 'John', 'last_name': 'Doe'}}");
+        }
+        if (type == "soc_sec") {
+            where = "WHERE soc_sec = :user";
+        } else if (type == "ldap") {
+            where = "WHERE ldap_id = :user";
+        } else if (type == "email") {
+            where = "FROM name n INNER JOIN address a ON n.soc_sec = a.soc_sec AND a.preferred = '1' WHERE a.email = :user";
+        } else {
+            return session.objUtils.createHttpMsg(400, "Bad Request");
+        }
+        for (attribute in jsonData.attributes) {
+            if (session.objUtils.isValidAttribute(attribute, "name")) {
+                table = i & " = :" & i;
+                keys = listAppend(keys, table, ',');
+                params.append([i, jsonData.attributes[i]]);
+            } else {
+                isValid = false;
+                break;
+            }
+        }
+        if (isValid) {
+            stmt = "UPDATE name SET " & keys & where & " SELECT @@RowCount AS affected";
+            result = session.objDB.execQuery(stmt, params);
+            if (result.affected > 0) {
+                return session.objUtils.createHttpMsg(202, "Accepted");
+            }
+            return session.objUtils.createHttpMsg(204, "No Change");
+        } else {
+            result = session.objUtils.createHttpMsg(400, "Invalid attribute specified");
+        }
+        return result;
     }
 
 }

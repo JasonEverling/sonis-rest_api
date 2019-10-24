@@ -8,17 +8,20 @@
 */
 component output="false" {
 
-    this.utils = CreateObject("component", "CFC.rest.utils");
-    this.objLogin = CreateObject("component", "CFC.rest.login");
-    this.objValid = CreateObject("component", "CFC.rest.validate");
+    // Set as global session vars since we dont have a modifiable application.cfc
+    session.objDB = CreateObject("component", "CFC.rest.database");
+    session.objUtils = CreateObject("component", "CFC.rest.utils");
 
     remote function v1() output=false {
+
+        this.objValid = CreateObject("component", "CFC.rest.validate");
+        this.objLogin = CreateObject("component", "CFC.rest.login");
+
         try {
-            //include "common/rest/header.cfm"; // Not used in prod
             // Setup the request
             include "../application.cfm";
             cfheader(name = "Content-Type", value = "application/json;charset=UTF-8");
-            this.objValid.validateSession();
+            this.objValid.validateSession(); // Validate api session, shorter than app defined
             hasHeaders = this.objValid.validateHeaders();
             if (!isBoolean(hasHeaders)) {
                 return hasHeaders;
@@ -26,9 +29,11 @@ component output="false" {
             }
             // Setup vars
             session.dsname = sonis.ds;
-            session.wwwroot = ExpandPath("./");
+            session.wwwroot = ExpandPath("../");
+            session.retries = (session.retries) ?: 0;
             session.apiUser = lCase(getHttpRequestData().headers["X-SONIS-USER"]);
             variables.apiToken = getHttpRequestData().headers["X-SONIS-PWD"];
+            variables.contentType = "application/json;charset=UTF-8";
             variables.output = "";
             variables.verb = "";
             if (getHTTPRequestData().method == 'GET') {
@@ -36,7 +41,7 @@ component output="false" {
                 variables.object = url.object;
                 variables.action = url.action;
                 variables.builtin = url.builtin;
-                variables.argumentdata = this.utils.listToStruct(url.argumentdata);
+                variables.argumentdata = session.objUtils.listToStruct(url.argumentdata);
             }
             if (getHTTPRequestData().method == 'POST') {
                 variables.verb = "POST";
@@ -47,21 +52,15 @@ component output="false" {
                     setVariable(key, apiData[key]);
                 }
             }
-            variables.contentType = "application/json;charset=UTF-8";
-            if (!isDefined('session.retries')) {
-                session.retries = 0;
-            }
-            // Object is a builtin Sonis function
-            if (!isDefined('builtin')) {
-                variables.builtin = false;
-            }
+            // Object is a builtin Sonis function, MUST be after 'apiData' is processed
+            variables.builtin = (builtin) ?: false;
             // Begin authorization sequence
             isAuthenticated = this.objLogin.apiAuthorization(variables.apiToken);
             // Throttle login attempts
             if (session.retries >= webopt.login_retries) {
                 locked = this.objLogin.disableLogin(session.apiUser);
                 if (!locked) {
-                    msg = this.utils.createHttpMsg(417, "Expectation Failed", "Please contact the site administrator");
+                    msg = session.objUtils.createHttpMsg(417, "Expectation Failed", "Please contact the site administrator");
                     writeOutput(msg);
                     exit;
                 }
@@ -69,12 +68,12 @@ component output="false" {
             // Check if disabled or locked
             isDisabled = this.objLogin.verifyCredentials(session.apiUser, variables.apiToken, '', 'security');
             if (isDisabled) {
-                variables.result = this.utils.createHttpMsg(401, "Account Disabled");
+                variables.result = session.objUtils.createHttpMsg(401, "Account Disabled");
             } else if (!isAuthenticated) {
                 if (isDefined('session.retries') && session.retries >= 0) {
                     session.retries = session.retries + 1;
                 }
-                variables.result = this.utils.createHttpMsg(401, "Unauthorized");
+                variables.result = session.objUtils.createHttpMsg(401, "Unauthorized");
             } else {
                 // We got a authorization, hooray, let's return some data
                 session.retries = 0;

@@ -11,7 +11,6 @@ component output="false"
 
     public function execQuery(required string stmt, required array params = [])
     {
-        utils = CreateObject("component", "utils");
         sql = new query();
         sql.setDatasource(session.dsname);
         sql.SetName("sql");
@@ -30,7 +29,7 @@ component output="false"
         } else if (arrayIsEmpty(params)) {
             result = sql.execute(sql = stmt).getResult();
         } else {
-            result = utils.createHttpMsg(400, "Bad Request", "Must be an array of arrays, example, [[your param, its value],[another param, its value]]");
+            result = session.objUtils.createHttpMsg(400, "Bad Request", "Must be an array of arrays, example, [[your param, its value],[another param, its value]]");
         }
         return result;
     }

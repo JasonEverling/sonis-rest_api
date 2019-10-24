@@ -8,9 +8,6 @@
 component output="false"
 {
 
-    db = createObject("component", "database");
-    utils = CreateObject("component", "utils");
-
     /**
      * Returns the details of a person
      *
@@ -28,7 +25,7 @@ component output="false"
         } else if (type == "email") {
             where = "WHERE a.e_mail = :user OR a.e_mail2 = :user";
         } else {
-            return utils.createHttpMsg(400, "Bad Request");
+            return session.objUtils.createHttpMsg(400, "Bad Request");
         }
         if (includePIN || includePIN == 1) {
             includePIN = "rtrim(CONVERT(char, DECRYPTBYKEYAUTOCERT(CERT_ID('SSN'), NULL, n.PIN))) AS pin, ";
@@ -52,7 +49,7 @@ component output="false"
                         LEFT JOIN division d ON n.div_cod = d.div_cod
                         LEFT JOIN dept ON n.dept_cod = dept.dept_cod
                         LEFT JOIN level_ l ON n.level_ = l.level_ " & where;
-        result = db.execQuery(stmt, params);
+        result = session.objDB.execQuery(stmt, params);
         return result;
     }
 
@@ -75,18 +72,18 @@ component output="false"
         } else if (type == "email") {
             where = "FROM name n INNER JOIN address a ON n.soc_sec = a.soc_sec AND a.preferred = '1' WHERE a.email = :user";
         } else {
-            return utils.createHttpMsg(204, "No Change");
+            return session.objUtils.createHttpMsg(204, "No Change");
         }
         params = [["user", user],["password", password]];
         stmt = "OPEN SYMMETRIC KEY SSN_Key_01
                 DECRYPTION BY CERTIFICATE SSN
                 UPDATE name
                 SET pin = EncryptByKey(Key_Guid('SSN_Key_01'),:password) " & where & " SELECT @@RowCount AS affected";
-        result = db.execQuery(stmt, params);
+        result = session.objDB.execQuery(stmt, params);
         if (result.affected > 0) {
-            return utils.createHttpMsg(202, "Accepted");
+            return session.objUtils.createHttpMsg(202, "Accepted");
         }
-        return utils.createHttpMsg(204, "No Change");
+        return session.objUtils.createHttpMsg(204, "No Change");
     }
 
     /**
@@ -111,7 +108,7 @@ component output="false"
         } else if (type == "email") {
             where = "INNER JOIN address a ON n.soc_sec = a.soc_sec AND a.preferred = '1' WHERE a.e_mail = :user AND n.pin = :password AND n.disabled = '0'";
         } else {
-            return utils.createHttpMsg(400, "Bad Request");
+            return session.objUtils.createHttpMsg(400, "Bad Request");
         }
         params = [["user", user],["password", password]];
         stmt = "SELECT n.soc_sec, n.disabled, CONVERT(char, DECRYPTBYKEYAUTOCERT(CERT_ID('SSN'), NULL, n.PIN)) AS pin FROM name n " & where;
@@ -120,10 +117,10 @@ component output="false"
                     FROM security s
                     WHERE s.user_id = :user AND CONVERT(char, DECRYPTBYKEYAUTOCERT(CERT_ID('SSN'), NULL, s.password)) = :password AND s.disabled = '0'";
         }
-        result = db.execQuery(stmt, params);
+        result = session.objDB.execQuery(stmt, params);
         if (result.affected > 0) {
-            return utils.createHttpMsg(200, "OK");
+            return session.objUtils.createHttpMsg(200, "OK");
         }
-        return utils.createHttpMsg(404, "Not Found");
+        return session.objUtils.createHttpMsg(404, "Not Found");
     }
 }
