@@ -122,7 +122,7 @@ component extends="person" output="false"
     }
 
     /**
-    * Update a persons name attributes
+    * Update a list of attributes for the given person
     *
     * @author Jason A. Everling
     * @user Username
@@ -130,10 +130,16 @@ component extends="person" output="false"
     * @attributes a json array (with the value of 'attributes') of arrays in attribute: value format, i.e {"attributes": {"first_name": "John", "last_name": "Doe"}}
     * @return string the value
     */
-    public function updateNameAttributes(required string user, required string type, required array attributes)
+    public function updateNameAttributes(required string user, required string type, required any attributes)
     {
-        attributes = replacenocase(attributes, ', ',',', 'all');
-        attrArray = listToArray(attributes, ',');
+        keys = '';
+        params = [["user", user]];
+        isValid = true;
+        if (isJSON(attributes)) {
+            jsonData = deserializeJSON(ToString(attributes));
+        } else {
+            return session.objUtils.createHttpMsg(400, "Bad Request", "A valid JSON array is required, i.e {'attributes': {'first_name': 'John', 'last_name': 'Doe'}}");
+        }
         if (type == "soc_sec") {
             where = "WHERE soc_sec = :user";
         } else if (type == "ldap") {
@@ -143,22 +149,23 @@ component extends="person" output="false"
         } else {
             return session.objUtils.createHttpMsg(400, "Bad Request");
         }
-        validColumns = [];
-        isValid = true;
-        for (attribute in attrArray) {
+        for (attribute in jsonData.attributes) {
             if (session.objUtils.isValidAttribute(attribute, "name")) {
-                arrayAppend(validColumns,attribute);
+                table = i & " = :" & i;
+                keys = listAppend(keys, table, ',');
+                params.append([i, jsonData.attributes[i]]);
             } else {
                 isValid = false;
                 break;
             }
         }
         if (isValid) {
-            params = [["user", user],["attribute", attribute],["newvalue", newvalue]];
-            orig = "UPDATE name SET " & attribute & " = :newvalue " & where & " SELECT @@RowCount AS affected";
-            stmt = "SELECT " & arrayToList(validColumns) & " " & "
-                    FROM name " & where;
+            stmt = "UPDATE name SET " & keys & where & " SELECT @@RowCount AS affected";
             result = session.objDB.execQuery(stmt, params);
+            if (result.affected > 0) {
+                return session.objUtils.createHttpMsg(202, "Accepted");
+            }
+            return session.objUtils.createHttpMsg(204, "No Change");
         } else {
             result = session.objUtils.createHttpMsg(400, "Invalid attribute specified");
         }
